@@ -4,6 +4,7 @@ from dashboard.views import dashboard_view,projects_view,inventory_view, project
 from authentication.views import login_view, logout_view
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -19,3 +20,7 @@ urlpatterns = [
     path('logout/', logout_view, name="logout_view"),
     path('maintenance/', maintenance_view, name="maintenance_view")
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+urlpatterns += [
+    path('sw.js', TemplateView.as_view(template_name="sw.js", content_type='application/javascript')),
+]
