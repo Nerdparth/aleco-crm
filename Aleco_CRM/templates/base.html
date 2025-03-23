@@ -295,7 +295,15 @@ a {
                     <p>No Orders to place, Everything up-to-date</p>
                 {% else %}
                     {% for order in pending_orders_list %}
-                        <p>🔔 Order pending for site {{ order.name }}</p>
+                        <p>🔔 Order pending for site {{ order.name }}
+                            {% if user.is_authenticated %}
+                            <form method="post" action="{% url 'accept_order' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="project_id" value="{{ order.id }}">
+                            <button class="btn btn-primary" type="submit">order placed</button>
+                            </form>
+                            {% endif %}
+                        </p>
                     {% endfor %}
                 {% endif %}
             </div>

@@ -620,3 +620,13 @@ def custom_admin_view(request):
             return redirect("custom_admin_view")
 
     return render(request, "admin.html", {"maintenance_mode" : maintenance_mode_getter, "sites" : sites, "inventory_items" : items, 'orders_pending_count' : orders_pending_count, "pending_orders_list" : orders_pending_getter } )
+
+def accept_order(request):
+    user = request.user
+    if user.is_authenticated:
+        if request.method == 'POST':
+            project_id = request.POST.get('project_id')
+            project = get_object_or_404(Projects, id=project_id)
+            project.is_ordered = True
+            project.save()
+    return redirect(request.META.get('HTTP_REFERER', '/'))
