@@ -3,221 +3,236 @@
 {% block title %} Projects {% endblock %}
 
 {% block content %}
-<style>:root {
-    --primary-bg: #c4c4c5;
-    --card-bg: #2b344d;
-    --accent-color: #3b82f6;
-    --text-primary: #ffffff;
-    --text-secondary: #94a3b8;
-    --success: #22c55e;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --card-border: rgba(59, 130, 246, 0.1);
-    --gradient-start: #3b82f6;
-    --gradient-end: #8b5cf6;
-}
+<style>
+    :root {
+        --primary-bg: #c4c4c5;
+        --card-bg: #2b344d;
+        --accent-color: #3b82f6;
+        --text-primary: #ffffff;
+        --text-secondary: #94a3b8;
+        --success: #22c55e;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --card-border: rgba(59, 130, 246, 0.1);
+        --gradient-start: #3b82f6;
+        --gradient-end: #8b5cf6;
+        --sidebar-width: 240px;
+        --sidebar-collapsed-width: 78px;
+    }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background-color: var(--primary-bg);
-    color: var(--text-primary);
-    line-height: 1.6;
-    min-height: 100vh;
-    padding: 2rem;
-}
-
-.dashboard {
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-.dashboard-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 2rem;
-    background: linear-gradient(to right, #3d3d3d, #333333);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-}
-
-.projects-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.project-card {
-    background: var(--card-bg);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    border: 1px solid var(--card-border);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    text-decoration: none;
-    color: var(--text-primary);
-}
-
-.project-card:hover {
-    transform: translateY(-5px);
-    border-color: var(--accent-color);
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
-}
-
-.project-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
-    opacity: 0.05;
-    transition: opacity 0.3s ease;
-}
-
-.project-card:hover::before {
-    opacity: 0.1;
-}
-
-.project-status {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 2rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    margin-bottom: 1rem;
-}
-
-.project-status.stage1 {
-    background: rgba(34, 197, 94, 0.1); /* Green */
-    color: #8BC34A;
-}
-.project-status.stage2 {
-    background: rgba(173, 216, 230, 0.1); /* Light Blue */
-    color: #ADD8E6;
-}
-.project-status.stage3 {
-    background: rgba(100, 149, 237, 0.1); /* Cornflower Blue */
-    color: #6495ED;
-}
-.project-status.stage4 {
-    background: rgba(30, 144, 255, 0.1); /* Dodger Blue */
-    color: #1E90FF;
-}
-.project-status.stage5 {
-    background: rgba(0, 191, 255, 0.1); /* Deep Sky Blue */
-    color: #00BFFF;
-}
-.project-status.stage6 {
-    background: rgba(255, 215, 0, 0.1); /* Gold */
-    color: #FFD700;
-}
-.project-status.stage7 {
-    background: rgba(255, 165, 0, 0.1); /* Orange */
-    color: #FFA500;
-}
-.project-status.stage8 {
-    background: rgba(255, 99, 71, 0.1); /* Tomato */
-    color: #FF6347;
-}
-.project-status.stage9 {
-    background: rgba(255, 69, 0, 0.1); /* Red-Orange */
-    color: #FF4500;
-}
-
-.project-card h3 {
-    font-size: 1.25rem;
-    margin-bottom: 0.75rem;
-    color: var(--text-primary);
-}
-
-.project-description {
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-    margin-bottom: 1.5rem;
-    line-height: 1.5;
-}
-
-.project-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    font-size: 0.875rem;
-}
-
-.project-progress {
-    position: relative;
-    padding-left: 1.5rem;
-}
-
-.progress-bar {
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 1rem;
-    height: 1rem;
-    border-radius: 50%;
-    background: conic-gradient(var(--success) var(--progress), var(--card-border) 0);
-}
-
-.project-deadline {
-    color: var(--text-secondary);
-}
-
-.project-team {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.team-member {
-    width: 2rem;
-    height: 2rem;
-    background: var(--card-border);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-}
-
-.team-more {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-}
-
-@media (max-width: 768px) {
     body {
-        padding: 1rem;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        background-color: var(--primary-bg);
+        color: var(--text-primary);
+        line-height: 1.6;
+        height: 100vh;
+        width: 100vw;
+        overflow-x: hidden;
+    }
+
+    /* Adjust margin when sidebar is collapsed */
+    body.nav-collapsed .dashboard {
+        margin-left: var(--sidebar-collapsed-width);
     }
 
     .dashboard-title {
-        font-size: 2rem;
+        font-size: 2.0rem;
+        font-weight: 600;
+        margin-bottom: 2rem;
+        margin-top: 70px;
+        background: linear-gradient(to right, #3d3d3d, #333333);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
     }
 
     .projects-grid {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
     }
-}
+
+    .project-card {
+        background: var(--card-bg);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        border: 1px solid var(--card-border);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        text-decoration: none;
+        color: var(--text-primary);
+        height: 280px;
+        margin-right: 10px;
+    }
+
+    .project-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--accent-color);
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+    }
+
+    .project-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
+        opacity: 0.05;
+        transition: opacity 0.3s ease;
+    }
+
+    .project-card:hover::before {
+        opacity: 0.1;
+    }
+
+    .project-status {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
+    }
+
+    .project-status.stage1 {
+        background: rgba(34, 197, 94, 0.1);
+        color: #8BC34A;
+    }
+    .project-status.stage2 {
+        background: rgba(173, 216, 230, 0.1);
+        color: #ADD8E6;
+    }
+    .project-status.stage3 {
+        background: rgba(100, 149, 237, 0.1);
+        color: #6495ED;
+    }
+    .project-status.stage4 {
+        background: rgba(30, 144, 255, 0.1);
+        color: #1E90FF;
+    }
+    .project-status.stage5 {
+        background: rgba(0, 191, 255, 0.1);
+        color: #00BFFF;
+    }
+    .project-status.stage6 {
+        background: rgba(255, 215, 0, 0.1);
+        color: #FFD700;
+    }
+    .project-status.stage7 {
+        background: rgba(255, 165, 0, 0.1);
+        color: #FFA500;
+    }
+    .project-status.stage8 {
+        background: rgba(255, 99, 71, 0.1);
+        color: #FF6347;
+    }
+    .project-status.stage9 {
+        background: rgba(255, 69, 0, 0.1);
+        color: #FF4500;
+    }
+
+    .project-card h3 {
+        font-size: 1.25rem;
+        margin-bottom: 0.75rem;
+        color: var(--text-primary);
+    }
+
+    .project-description {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+    }
+
+    .project-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        font-size: 0.875rem;
+    }
+
+    .project-progress {
+        position: relative;
+        padding-left: 1.5rem;
+    }
+
+    .progress-bar {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        background: conic-gradient(var(--success) var(--progress), var(--card-border) 0);
+    }
+
+    .project-deadline {
+        color: var(--text-secondary);
+    }
+
+    .project-team {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .team-member {
+        width: 2rem;
+        height: 2rem;
+        background: var(--card-border);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+
+    .team-more {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+        .dashboard {
+            padding: 1rem;
+            margin-left: 0;
+        }
+
+        .dashboard-title {
+            font-size: 2rem;
+            margin-top: 50px;
+            margin-left: 10px;
+        }
+
+        .projects-grid {
+            grid-template-columns: 1fr;
+            margin-left: 10px;
+            /* margin-right: 10px; */
+        }
+
+        .project-card{
+            margin-right: 0px;
+        }
+    }
 </style>
 
-<div class="dashboard">
+
     <h1 class="dashboard-title">Active Projects</h1>
     
     <div class="projects-grid">
-
-        {%  for project in projects %}
+        {% for project in projects %}
         <a href="{% url 'project_details' project.name %}" class="project-card">
             <div class="project-status stage{{ project.stage }}">stage {{ project.stage }}</div>
             <h3>{{ project.name }}</h3>
@@ -237,9 +252,6 @@ body {
             </div>
         </a>
         {% endfor %}
-
-        
-
     </div>
-</div>
+
 {% endblock %}
