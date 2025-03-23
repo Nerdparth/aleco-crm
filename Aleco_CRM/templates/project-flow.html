@@ -1,0 +1,1221 @@
+{% extends 'base.html' %}
+{% block title %} Project Flow {% endblock %}
+{% block content %}
+    <style>
+        :root {
+            --primary-bg: #2b344d;
+            --card-bg: #2b344d;
+            --accent-color: #3b82f6;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --card-border: rgba(59, 130, 246, 0.1);
+            --gradient-start: #3b82f6;
+            --gradient-end: #8b5cf6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        input:disabled {
+            background-color: #373737;
+        }
+
+        .content-wrapper {
+            width: 100%;
+            padding: 1rem;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #3d3d3d, #333333);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .projects-table-container {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 1rem;
+            border: 1px solid var(--card-border);
+            overflow-x: auto;
+            margin-bottom: 2rem;
+            width: 100%;
+            max-width: 100%;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+
+        .projects-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            min-width: 1000px; /* Ensures table doesn't shrink too much */
+        }
+
+        .projects-table th,
+        .projects-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--card-border);
+            vertical-align: top;
+        }
+
+        .projects-table th {
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: sticky;
+            top: 0;
+            background-color: var(--card-bg);
+            z-index: 10;
+        }
+
+        .projects-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .projects-table tr:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .project-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .project-details {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .project-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: rgba(59, 130, 246, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-color);
+            font-size: 1.25rem;
+        }
+
+        .stage-cell {
+            position: relative;
+            min-width: 180px;
+            max-width: 200px;
+        }
+
+        .stage-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .stage-status.completed {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+        }
+
+        .stage-status.pending {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .stage-status.partial {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .windows-form {
+            margin-top: 0.75rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0.5rem;
+            border: 1px solid var(--card-border);
+        }
+
+        .windows-form-title {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .windows-input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .windows-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
+            border-radius: 0.25rem;
+            padding: 0.5rem;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            width: 100%;
+        }
+
+        .windows-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .windows-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .windows-submit {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .windows-submit:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .stage-complete-form {
+            margin-top: 0.75rem;
+        }
+
+        .stage-button {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .stage-button:hover {
+            background: var(--success);
+            color: white;
+        }
+
+        .stage-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .stage-button:disabled:hover {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+        }
+
+        .stage-date {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .stage-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: var(--accent-color);
+            transition: width 0.3s ease;
+            width: 0;
+        }
+
+        .windows-progress {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .progress-bar-container {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--accent-color);
+            border-radius: 3px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-color.completed {
+            background-color: var(--success);
+        }
+
+        .legend-color.pending {
+            background-color: var(--danger);
+        }
+
+        .legend-color.partial {
+            background-color: var(--warning);
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-button {
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            border: 1px solid var(--card-border);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-button.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .filter-button:hover:not(.active) {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        /* Fix for sidebar interaction */
+        #content-main {
+            width: 100%;
+            transition: margin-left 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            .projects-table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding: 0.75rem;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+            }
+            
+            .filters {
+                flex-wrap: wrap;
+            }
+
+            .projects-table th,
+            .projects-table td {
+                padding: 0.5rem;
+            }
+
+            .stage-cell {
+                min-width: 160px;
+            }
+        }
+
+        /* Fix for mobile sidebar overlay */
+        @media (max-width: 992px) {
+            .sidebar-open #content-main {
+                margin-left: 0 !important;
+            }
+        }
+    </style>
+        <div class="projects-table-container">
+            <table class="projects-table">
+                <thead>
+                    <tr>
+                        <th>Project/Site</th>
+                        <th>Stage 1: Measurement</th>
+                        <th>Stage 2: Cutting frames</th>
+                        <th>Stage 3: Cutting sashes</th>
+                        <th>Stage 4: Jalli palle</th>
+                        <th>Stage 5: Assembled</th>
+                        <th>Stage 6: Packed</th>
+                        <th>Stage 7: Beading</th>
+                        <th>Stage 8: Delivered</th>
+                        <th>Stage 9: Installation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Project 1 -->
+                     {% for project in projects %}
+                    <tr>
+                        <td>
+                            <div class="project-name">
+                                <div class="project-icon"><i class='bx bx-building-house'></i></div>
+                                <span>{{ project.name }}</span>
+                            </div>
+                            <div class="project-details">
+                                <div>Total Windows: {{ project.windows }}</div>
+                                <div>address: {{ project.address }}</div>
+                            </div>
+                        </td>
+                        
+                        <!-- Stage 1 -->
+                        <td class="stage-cell">
+                        {% if project.stage1_completion_status %}
+                        <div class="stage-progress" style="width: 100%;"></div>
+                        <div class="stage-status completed">Completed</div>
+                        <div class="stage-date">Completed: Mar 10, 2024</div>
+                        {% elif project.stage1_window > 0 %}
+                        <div class="stage-progress" style="width: {{ project.stage1_progress_percentage }}%;"></div>
+                        <div class="stage-status partial">Partially Completed</div>
+                        <div class="stage-date">In Progress</div>
+                        {% elif project.stage1_window == 0 %}
+                        <div class="stage-progress" style="width: 0%;"></div>
+                        <div class="stage-status pending">Not Started</div>
+                        <div class="stage-date">Due: {{ project.created_at }}</div>
+                        {% endif %}
+
+                            <div class="windows-form">
+                                {% if project.stage1_progress_percentage != 100 and project.current_stage == 1 %}
+                                <form method="post" action="{% url 'project_flow' %}">
+                                    {% csrf_token %} 
+                                <div class="windows-form-title">Windows Completed</div>
+                                <div class="windows-input-group">
+                                    <input type="number" class="windows-input" value="{{ project.stage1_window }}" name="stage1_window" min="0" max="{{ project.windows }}">
+                                    <span class="windows-label">/ {{ project.windows }}</span>
+                                </div>
+                                <div class="windows-progress">
+                                    <span>Progress:</span>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar" style="width: {{ project.stage1_progress_percentage }}%"></div>
+                                    </div>
+                                    <span>{{ project.stage1_progress_percentage }}%</span>
+                                </div>
+                                
+                                    <input type="hidden" name="project_id" value="{{ project.id }}">
+                                <button type="submit" name="edit_stage1" class="windows-submit">
+                                    <i class='bx bx-save'></i> Update
+                                </button>
+                            </form>
+                            {% else %}
+                            <form method="post" action="{% url 'project_flow' %}">
+                                {% csrf_token %} 
+                            <div class="windows-form-title">Windows Completed</div>
+                            <div class="windows-input-group">
+                                <input type="number" class="windows-input" value="{{ project.stage1_window }}" min="0" max="{{ project.windows }}" disabled>
+                                <span class="windows-label">/ {{ project.windows }}</span>
+                            </div>
+                            <div class="windows-progress">
+                                <span>Progress:</span>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: {{ project.stage1_progress_percentage }}%"></div>
+                                </div>
+                                <span>{{ project.stage1_progress_percentage }}%</span>
+                            </div>
+                            
+                                <input type="hidden" name="project_id" value="{{ project.id }}" disabled>
+                            <button type="submit" name="edit_stage1" class="windows-submit" disabled>
+                                <i class='bx bx-save'></i> Update
+                            </button>
+                        </form>
+                            {% endif %}
+                            </div>
+                            {% if project.stage1_progress_percentage != 100 and project.current_stage == 1 %}
+                            <form method="post" action="{% url 'project_flow' %}" class="stage-complete-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="project_id" value="{{ project.id }}">
+                                <button type="submit" name="stage1_complete" class="stage-button">
+                                    <i class='bx bx-check-circle'></i> Mark Stage Complete
+                                </button>
+                            </form>
+                            {% else %}
+                            <form class="stage-complete-form">
+                                <button type="button" class="stage-button" disabled>
+                                    <i class='bx bx-check-circle'></i> Mark Stage Complete
+                                </button>
+                            </form>
+                            {% endif %}
+
+                        </td>
+                        
+                        <!-- Stage 2 -->
+                        <td class="stage-cell">
+                            {% if project.stage2_completion_status %}
+                            <div class="stage-progress" style="width: 100%;"></div>
+                            <div class="stage-status completed">Completed</div>
+                            <div class="stage-date">Completed: Mar 10, 2024</div>
+                            {% elif project.stage2_window > 0 %}
+                            <div class="stage-progress" style="width: {{ project.stage2_progress_percentage }}%;"></div>
+                            <div class="stage-status partial">Partially Completed</div>
+                            <div class="stage-date">In Progress</div>
+                            {% elif project.stage2_window == 0 %}
+                            <div class="stage-progress" style="width: 0%;"></div>
+                            <div class="stage-status pending">Not Started</div>
+                            <div class="stage-date">Due: {{ project.created_at }}</div>
+                            {% endif %}
+    
+                            
+                            <div class="windows-form">
+                                {% if project.stage2_progress_percentage != 100 and project.current_stage == 2 %}
+                                <form method="post" action="{% url 'project_flow' %}">
+                                    {% csrf_token %}
+                                <div class="windows-form-title">Windows Completed</div>
+                                <div class="windows-input-group">
+                                    <input type="number" class="windows-input" value="{{ project.stage2_window }}" name="stage2_window" min="0" max="{{ project.windows }}">
+                                    <span class="windows-label">/ {{ project.windows }}</span>
+                                </div>
+                                <div class="windows-progress">
+                                    <span>Progress:</span>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar" style="width: {{ project.stage2_progress_percentage }}%"></div>
+                                    </div>
+                                    <span>{{ project.stage2_progress_percentage }}%</span>
+                                </div>
+                                
+                                    <input type="hidden" name="project_id" value="{{ project.id }}">
+                                <button type="submit" name="edit_stage2" class="windows-submit">
+                                    <i class='bx bx-save'></i> Update
+                                </button>
+                            </form>
+                            {% else %}
+                            <form method="post" action="{% url 'project_flow' %}">
+                                {% csrf_token %}
+                                <div class="windows-form-title">Windows Completed</div>
+                                <div class="windows-input-group">
+                                    <input type="number" class="windows-input" value="{{ project.stage2_window }}" min="0" max="{{ project.windows }}" disabled>
+                                    <span class="windows-label">/ {{ project.windows }}</span>
+                                </div>
+                                <div class="windows-progress">
+                                    <span>Progress:</span>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar" style="width: {{ project.stage2_progress_percentage }}%"></div>
+                                    </div>
+                                    <span>{{ project.stage2_progress_percentage }}%</span>
+                                </div>
+                                
+                                    <input type="hidden" name="project_id" value="{{ project.id }}" disabled>
+                                <button type="submit" name="edit_stage2" class="windows-submit" disabled>
+                                    <i class='bx bx-save'></i> Update
+                                </button>
+                            </form>
+                            {% endif %}
+                            </div>
+                            
+                            {% if project.stage2_progress_percentage != 100 and project.current_stage == 2 %}
+                            <form method="post" action="{% url 'project_flow' %}" class="stage-complete-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="project_id" value="{{ project.id }}">
+                                <button type="submit" name="stage2_complete" class="stage-button">
+                                    <i class='bx bx-check-circle'></i> Mark Stage Complete
+                                </button>
+                            </form>
+                            {% else %}
+                            <form class="stage-complete-form">
+                                <button type="button" class="stage-button" disabled>
+                                    <i class='bx bx-check-circle'></i> Mark Stage Complete
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Stage 3 -->
+                        <td class="stage-cell">
+                            {% if project.stage3_completion_status %}
+                            <div class="stage-progress" style="width: 100%;"></div>
+                            <div class="stage-status completed">Completed</div>
+                            <div class="stage-date">Completed: Mar 10, 2024</div>
+                            {% elif project.stage3_window > 0 %}
+                            <div class="stage-progress" style="width: {{ project.stage3_progress_percentage }}%;"></div>
+                            <div class="stage-status partial">Partially Completed</div>
+                            <div class="stage-date">In Progress</div>
+                            {% elif project.stage3_window == 0 %}
+                            <div class="stage-progress" style="width: 0%;"></div>
+                            <div class="stage-status pending">Not Started</div>
+                            <div class="stage-date">Due: {{ project.created_at }}</div>
+                            {% endif %}
+    
+
+                            
+                            <div class="windows-form">
+                                {% if project.stage3_progress_percentage != 100 and project.current_stage == 3 %}
+                                <form method="post" action="{% url 'project_flow' %}">
+                                    {% csrf_token %}
+                                <div class="windows-form-title">Windows Completed</div>
+                                <div class="windows-input-group">
+                                    <input type="number" class="windows-input" value="{{ project.stage3_window }}" name="stage3_window" min="0" max="{{ project.windows }}">
+                                    <span class="windows-label">/ {{ project.windows }}</span>
+                                </div>
+                                <div class="windows-progress">
+                                    <span>Progress:</span>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar" style="width: {{ project.stage3_progress_percentage }}%"></div>
+                                    </div>
+                                    <span>{{ project.stage3_progress_percentage }}%</span>
+                                </div>
+                                
+                                    <input type="hidden" name="project_id" value="{{ project.id }}">
+                                <button type="submit" name="edit_stage3" class="windows-submit">
+                                    <i class='bx bx-save'></i> Update
+                                </button>
+                            </form>
+                            {% else %}
+                            <form method="post" action="{% url 'project_flow' %}">
+                                {% csrf_token %}
+                                <div class="windows-form-title">Windows Completed</div>
+                                <div class="windows-input-group">
+                                    <input type="number" class="windows-input" value="{{ project.stage3_window }}" min="0" max="{{ project.windows }}" disabled>
+                                    <span class="windows-label">/ {{ project.windows }}</span>
+                                </div>
+                                <div class="windows-progress">
+                                    <span>Progress:</span>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar" style="width: {{ project.stage3_progress_percentage }}%"></div>
+                                    </div>
+                                    <span>{{ project.stage3_progress_percentage }}%</span>
+                                </div>
+                                
+                                    <input type="hidden" name="project_id" value="{{ project.id }}" disabled>
+                                <button type="submit" name="edit_stage3" class="windows-submit" disabled>
+                                    <i class='bx bx-save'></i> Update
+                                </button>
+                            </form>
+                            {% endif %}
+                            </div>
+                            
+                            {% if project.stage3_progress_percentage != 100 and project.current_stage == 3 %}
+                            <form method="post" action="{% url 'project_flow' %}" class="stage-complete-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="project_id" value="{{ project.id }}">
+                                <button type="submit" name="stage3_complete" class="stage-button">
+                                    <i class='bx bx-check-circle'></i> Mark Stage Complete
+                                </button>
+                            </form>
+                            {% else %}
+                            <form class="stage-complete-form">
+                                <button type="button" class="stage-button" disabled>
+                                    <i class='bx bx-check-circle'></i> Mark Stage Complete
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Stage 4 -->
+                        <td class="stage-cell">
+                            {% if project.stage4_completion_status %}
+                            <div class="stage-progress" style="width: 100%;"></div>
+                            <div class="stage-status completed">Completed</div>
+                            <div class="stage-date">Completed: Mar 10, 2024</div>
+                            {% elif project.stage4_window > 0 %}
+                            <div class="stage-progress" style="width: {{ project.stage4_progress_percentage }}%;"></div>
+                            <div class="stage-status partial">Partially Completed</div>
+                            <div class="stage-date">In Progress</div>
+                            {% elif project.stage4_window == 0 %}
+                            <div class="stage-progress" style="width: 0%;"></div>
+                            <div class="stage-status pending">Not Started</div>
+                            <div class="stage-date">Due: {{ project.created_at }}</div>
+                            {% endif %}
+    
+                            
+                            <div class="windows-form">
+                                {% if project.stage4_progress_percentage != 100 and project.current_stage == 4 %}
+                                <form method="post" action="{% url 'project_flow' %}">
+                                    {% csrf_token %}
+                                <div class="windows-form-title">Windows Completed</div>
+                                <div class="windows-input-group">
+                                    <input type="number" class="windows-input" value="{{ project.stage4_window }}" name="stage4_window" min="0" max="{{ project.windows }}">
+                                    <span class="windows-label">/ {{ project.windows }}</span>
+                                </div>
+                                <div class="windows-progress">
+                                    <span>Progress:</span>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar" style="width: {{ project.stage4_progress_percentage }}%"></div>
+                                    </div>
+                                    <span>{{ project.stage4_progress_percentage }}%</span>
+                                </div>
+                                
+                                    <input type="hidden" name="project_id" value="{{ project.id }}">
+                                <button type="submit" name="edit_stage4" class="windows-submit">
+                                    <i class='bx bx-save'></i> Update
+                                </button>
+                            </form>
+                            {% else %}
+                            <form method="post" action="{% url 'project_flow' %}">
+                                {% csrf_token %}
+                                <div class="windows-form-title">Windows Completed</div>
+                                <div class="windows-input-group">
+                                    <input type="number" class="windows-input" value="{{ project.stage4_window }}" min="0" max="{{ project.windows }}" disabled>
+                                    <span class="windows-label">/ {{ project.windows }}</span>
+                                </div>
+                                <div class="windows-progress">
+                                    <span>Progress:</span>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar" style="width: {{ project.stage4_progress_percentage }}%"></div>
+                                    </div>
+                                    <span>{{ project.stage4_progress_percentage }}%</span>
+                                </div>
+                                
+                                    <input type="hidden" name="project_id" value="{{ project.id }}" disabled>
+                                <button type="submit" name="edit_stage4" class="windows-submit" disabled>
+                                    <i class='bx bx-save'></i> Update
+                                </button>
+                            </form>
+                            {% endif %}
+                            </div>
+                            
+                            {% if project.stage4_progress_percentage != 100 and project.current_stage == 4 %}
+                            <form method="post" action="{% url 'project_flow' %}" class="stage-complete-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="project_id" value="{{ project.id }}">
+                                <button type="submit" name="stage4_complete" class="stage-button">
+                                    <i class='bx bx-check-circle'></i> Mark Stage Complete
+                                </button>
+                              
+                                
+                            </form>
+                            {% else %}
+                            <form class="stage-complete-form">
+                                <button type="button" class="stage-button" disabled>
+                                    <i class='bx bx-check-circle'></i> Mark Stage Complete
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Stage 5 -->
+                        <td class="stage-cell">
+                            {% if project.stage5_completion_status %}
+                            <div class="stage-progress" style="width: 100%;"></div>
+                            <div class="stage-status completed">Completed</div>
+                            <div class="stage-date">Completed: Mar 10, 2024</div>
+                            {% elif project.stage5_window > 0 %}
+                            <div class="stage-progress" style="width: {{ project.stage5_progress_percentage }}%;"></div>
+                            <div class="stage-status partial">Partially Completed</div>
+                            <div class="stage-date">In Progress</div>
+                            {% elif project.stage5_window == 0 %}
+                            <div class="stage-progress" style="width: 0%;"></div>
+                            <div class="stage-status pending">Not Started</div>
+                            <div class="stage-date">Due: {{ project.created_at }}</div>
+                            {% endif %}
+    
+
+                            
+                            <div class="windows-form">
+                                {% if project.stage5_progress_percentage != 100 and project.current_stage == 5 %}
+                                <form method="post" action="{% url 'project_flow' %}">
+                                    {% csrf_token %}
+                                <div class="windows-form-title">Windows Completed</div>
+                                <div class="windows-input-group">
+                                    <input type="number" class="windows-input" value="{{ project.stage5_window }}" name="stage5_window" min="0" max="{{ project.windows }}">
+                                    <span class="windows-label">/ {{ project.windows }}</span>
+                                </div>
+                                <div class="windows-progress">
+                                    <span>Progress:</span>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar" style="width: {{ project.stage5_progress_percentage }}%"></div>
+                                    </div>
+                                    <span>{{ project.stage5_progress_percentage }}%</span>
+                                </div>
+                                
+                                    <input type="hidden" name="project_id" value="{{ project.id }}">
+                                <button type="submit" name="edit_stage5" class="windows-submit">
+                                    <i class='bx bx-save'></i> Update
+                                </button>
+                            </form>
+                            {% else %}
+                            <form method="post" action="{% url 'project_flow' %}">
+                                {% csrf_token %}
+                                <div class="windows-form-title">Windows Completed</div>
+                                <div class="windows-input-group">
+                                    <input type="number" class="windows-input" value="{{ project.stage5_window }}" min="0" max="{{ project.windows }}" disabled>
+                                    <span class="windows-label">/ {{ project.windows }}</span>
+                                </div>
+                                <div class="windows-progress">
+                                    <span>Progress:</span>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar" style="width: {{ project.stage5_progress_percentage }}%"></div>
+                                    </div>
+                                    <span>{{ project.stage5_progress_percentage }}%</span>
+                                </div>
+                                
+                                    <input type="hidden" name="project_id" value="{{ project.id }}" disabled>
+                                <button type="submit" name="edit_stage5" class="windows-submit" disabled>
+                                    <i class='bx bx-save'></i> Update
+                                </button>
+                            </form>
+                            {% endif %}
+                            </div>
+                            
+                            {% if project.stage5_progress_percentage != 100 and project.current_stage == 5 %}
+                            <form method="post" action="{% url 'project_flow' %}" class="stage-complete-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="project_id" value="{{ project.id }}">
+                                <button type="submit" name="stage5_complete" class="stage-button">
+                                    <i class='bx bx-check-circle'></i> Mark Stage Complete
+                                </button>
+                            </form>
+                            {% else %}
+                            <form class="stage-complete-form">
+                                <button type="button" class="stage-button" disabled>
+                                    <i class='bx bx-check-circle'></i> Mark Stage Complete
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                        <!-- stage6 -->
+
+                        <td class="stage-cell">
+                            {% if project.stage6_completion_status %}
+                            <div class="stage-progress" style="width: 100%;"></div>
+                            <div class="stage-status completed">Completed</div>
+                            <div class="stage-date">Completed: Mar 10, 2024</div>
+                            {% elif project.stage6_window > 0 %}
+                            <div class="stage-progress" style="width: {{ project.stage6_progress_percentage }}%;"></div>
+                            <div class="stage-status partial">Partially Completed</div>
+                            <div class="stage-date">In Progress</div>
+                            {% elif project.stage6_window == 0 %}
+                            <div class="stage-progress" style="width: 0%;"></div>
+                            <div class="stage-status pending">Not Started</div>
+                            <div class="stage-date">Due: {{ project.created_at }}</div>
+                            {% endif %}
+    
+                                <div class="windows-form">
+                                    {% if project.stage6_progress_percentage != 100 and project.current_stage == 6 %}
+                                    <form method="post" action="{% url 'project_flow' %}">
+                                        {% csrf_token %} 
+                                    <div class="windows-form-title">Windows Completed</div>
+                                    <div class="windows-input-group">
+                                        <input type="number" class="windows-input" value="{{ project.stage6_window }}" name="stage6_window" min="0" max="{{ project.windows }}">
+                                        <span class="windows-label">/ {{ project.windows }}</span>
+                                    </div>
+                                    <div class="windows-progress">
+                                        <span>Progress:</span>
+                                        <div class="progress-bar-container">
+                                            <div class="progress-bar" style="width: {{ project.stage6_progress_percentage }}%"></div>
+                                        </div>
+                                        <span>{{ project.stage6_progress_percentage }}%</span>
+                                    </div>
+                                    
+                                        <input type="hidden" name="project_id" value="{{ project.id }}">
+                                    <button type="submit" name="edit_stage6" class="windows-submit">
+                                        <i class='bx bx-save'></i> Update
+                                    </button>
+                                </form>
+                                {% else %}
+                                <form method="post" action="{% url 'project_flow' %}">
+                                    {% csrf_token %} 
+                                <div class="windows-form-title">Windows Completed</div>
+                                <div class="windows-input-group">
+                                    <input type="number" class="windows-input" value="{{ project.stage6_window }}" min="0" max="{{ project.windows }}" disabled>
+                                    <span class="windows-label">/ {{ project.windows }}</span>
+                                </div>
+                                <div class="windows-progress">
+                                    <span>Progress:</span>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar" style="width: {{ project.stage6_progress_percentage }}%"></div>
+                                    </div>
+                                    <span>{{ project.stage6_progress_percentage }}%</span>
+                                </div>
+                                
+                                    <input type="hidden" name="project_id" value="{{ project.id }}" disabled>
+                                <button type="submit" name="edit_stage1" class="windows-submit" disabled>
+                                    <i class='bx bx-save'></i> Update
+                                </button>
+                            </form>
+                                {% endif %}
+                                </div>
+                                {% if project.stage6_progress_percentage != 100 and project.current_stage == 6 %}
+                                <form method="post" action="{% url 'project_flow' %}" class="stage-complete-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="project_id" value="{{ project.id }}">
+                                    <button type="submit" name="stage6_complete" class="stage-button">
+                                        <i class='bx bx-check-circle'></i> Mark Stage Complete
+                                    </button>
+                                </form>
+                                {% else %}
+                                <form class="stage-complete-form">
+                                    <button type="button" class="stage-button" disabled>
+                                        <i class='bx bx-check-circle'></i> Mark Stage Complete
+                                    </button>
+                                </form>
+                                {% endif %}
+    
+                            </td>
+                            <!-- stage7 -->
+
+<td class="stage-cell">
+    {% if project.stage7_completion_status %}
+    <div class="stage-progress" style="width: 100%;"></div>
+    <div class="stage-status completed">Completed</div>
+    <div class="stage-date">Completed: Mar 10, 2024</div>
+    {% elif project.stage7_window > 0 %}
+    <div class="stage-progress" style="width: {{ project.stage7_progress_percentage }}%;"></div>
+    <div class="stage-status partial">Partially Completed</div>
+    <div class="stage-date">In Progress</div>
+    {% elif project.stage7_window == 0 %}
+    <div class="stage-progress" style="width: 0%;"></div>
+    <div class="stage-status pending">Not Started</div>
+    <div class="stage-date">Due: {{ project.created_at }}</div>
+    {% endif %}
+
+    <div class="windows-form">
+        {% if project.stage7_progress_percentage != 100 and project.current_stage == 7 %}
+        <form method="post" action="{% url 'project_flow' %}">
+            {% csrf_token %} 
+            <div class="windows-form-title">Windows Completed</div>
+            <div class="windows-input-group">
+                <input type="number" class="windows-input" value="{{ project.stage7_window }}" name="stage7_window" min="0" max="{{ project.windows }}">
+                <span class="windows-label">/ {{ project.windows }}</span>
+            </div>
+            <div class="windows-progress">
+                <span>Progress:</span>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: {{ project.stage7_progress_percentage }}%"></div>
+                </div>
+                <span>{{ project.stage7_progress_percentage }}%</span>
+            </div>
+            <input type="hidden" name="project_id" value="{{ project.id }}">
+            <button type="submit" name="edit_stage7" class="windows-submit">
+                <i class='bx bx-save'></i> Update
+            </button>
+        </form>
+        {% else %}
+        <form method="post" action="{% url 'project_flow' %}">
+            {% csrf_token %} 
+            <div class="windows-form-title">Windows Completed</div>
+            <div class="windows-input-group">
+                <input type="number" class="windows-input" value="{{ project.stage7_window }}" min="0" max="{{ project.windows }}" disabled>
+                <span class="windows-label">/ {{ project.windows }}</span>
+            </div>
+            <div class="windows-progress">
+                <span>Progress:</span>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: {{ project.stage7_progress_percentage }}%"></div>
+                </div>
+                <span>{{ project.stage7_progress_percentage }}%</span>
+            </div>
+            <input type="hidden" name="project_id" value="{{ project.id }}" disabled>
+            <button type="submit" name="edit_stage7" class="windows-submit" disabled>
+                <i class='bx bx-save'></i> Update
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    {% if project.stage7_progress_percentage != 100 and project.current_stage == 7 %}
+    <form method="post" action="{% url 'project_flow' %}" class="stage-complete-form">
+        {% csrf_token %}
+        <input type="hidden" name="project_id" value="{{ project.id }}">
+        <button type="submit" name="stage7_complete" class="stage-button">
+            <i class='bx bx-check-circle'></i> Mark Stage Complete
+        </button>
+    </form>
+    {% else %}
+    <form class="stage-complete-form">
+        <button type="button" class="stage-button" disabled>
+            <i class='bx bx-check-circle'></i> Mark Stage Complete
+        </button>
+    </form>
+    {% endif %}
+</td>
+
+<!-- stage7 ends -->
+
+<!-- stage8 -->
+
+<td class="stage-cell">
+    {% if project.stage8_completion_status %}
+    <div class="stage-progress" style="width: 100%;"></div>
+    <div class="stage-status completed">Completed</div>
+    <div class="stage-date">Completed: Mar 10, 2024</div>
+    {% elif project.stage8_window > 0 %}
+    <div class="stage-progress" style="width: {{ project.stage8_progress_percentage }}%;"></div>
+    <div class="stage-status partial">Partially Completed</div>
+    <div class="stage-date">In Progress</div>
+    {% elif project.stage8_window == 0 %}
+    <div class="stage-progress" style="width: 0%;"></div>
+    <div class="stage-status pending">Not Started</div>
+    <div class="stage-date">Due: {{ project.created_at }}</div>
+    {% endif %}
+
+    <div class="windows-form">
+        {% if project.stage8_progress_percentage != 100 and project.current_stage == 8 %}
+        <form method="post" action="{% url 'project_flow' %}">
+            {% csrf_token %} 
+            <div class="windows-form-title">Windows Completed</div>
+            <div class="windows-input-group">
+                <input type="number" class="windows-input" value="{{ project.stage8_window }}" name="stage8_window" min="0" max="{{ project.windows }}">
+                <span class="windows-label">/ {{ project.windows }}</span>
+            </div>
+            <div class="windows-progress">
+                <span>Progress:</span>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: {{ project.stage8_progress_percentage }}%"></div>
+                </div>
+                <span>{{ project.stage8_progress_percentage }}%</span>
+            </div>
+            <input type="hidden" name="project_id" value="{{ project.id }}">
+            <button type="submit" name="edit_stage8" class="windows-submit">
+                <i class='bx bx-save'></i> Update
+            </button>
+        </form>
+        {% else %}
+        <form method="post" action="{% url 'project_flow' %}">
+            {% csrf_token %} 
+            <div class="windows-form-title">Windows Completed</div>
+            <div class="windows-input-group">
+                <input type="number" class="windows-input" value="{{ project.stage8_window }}" min="0" max="{{ project.windows }}" disabled>
+                <span class="windows-label">/ {{ project.windows }}</span>
+            </div>
+            <div class="windows-progress">
+                <span>Progress:</span>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: {{ project.stage8_progress_percentage }}%"></div>
+                </div>
+                <span>{{ project.stage8_progress_percentage }}%</span>
+            </div>
+            <input type="hidden" name="project_id" value="{{ project.id }}" disabled>
+            <button type="submit" name="edit_stage8" class="windows-submit" disabled>
+                <i class='bx bx-save'></i> Update
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    {% if project.stage8_progress_percentage != 100 and project.current_stage == 8 %}
+    <form method="post" action="{% url 'project_flow' %}" class="stage-complete-form">
+        {% csrf_token %}
+        <input type="hidden" name="project_id" value="{{ project.id }}">
+        <button type="submit" name="stage8_complete" class="stage-button">
+            <i class='bx bx-check-circle'></i> Mark Stage Complete
+        </button>
+    </form>
+    {% else %}
+    <form class="stage-complete-form">
+        <button type="button" class="stage-button" disabled>
+            <i class='bx bx-check-circle'></i> Mark Stage Complete
+        </button>
+    </form>
+    {% endif %}
+</td>
+
+<!-- stage8 ends -->
+
+<!-- stage9 -->
+
+<td class="stage-cell">
+    {% if project.stage9_completion_status %}
+    <div class="stage-progress" style="width: 100%;"></div>
+    <div class="stage-status completed">Completed</div>
+    <div class="stage-date">Completed: Mar 10, 2024</div>
+    {% elif project.stage9_window > 0 %}
+    <div class="stage-progress" style="width: {{ project.stage9_progress_percentage }}%;"></div>
+    <div class="stage-status partial">Partially Completed</div>
+    <div class="stage-date">In Progress</div>
+    {% elif project.stage9_window == 0 %}
+    <div class="stage-progress" style="width: 0%;"></div>
+    <div class="stage-status pending">Not Started</div>
+    <div class="stage-date">Due: {{ project.created_at }}</div>
+    {% endif %}
+
+    <div class="windows-form">
+        {% if project.stage9_progress_percentage != 100 and project.current_stage == 9 %}
+        <form method="post" action="{% url 'project_flow' %}">
+            {% csrf_token %} 
+            <div class="windows-form-title">Windows Completed</div>
+            <div class="windows-input-group">
+                <input type="number" class="windows-input" value="{{ project.stage9_window }}" name="stage9_window" min="0" max="{{ project.windows }}">
+                <span class="windows-label">/ {{ project.windows }}</span>
+            </div>
+            <div class="windows-progress">
+                <span>Progress:</span>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: {{ project.stage9_progress_percentage }}%"></div>
+                </div>
+                <span>{{ project.stage9_progress_percentage }}%</span>
+            </div>
+            <input type="hidden" name="project_id" value="{{ project.id }}">
+            <button type="submit" name="edit_stage9" class="windows-submit">
+                <i class='bx bx-save'></i> Update
+            </button>
+        </form>
+        {% else %}
+        <form method="post" action="{% url 'project_flow' %}">
+            {% csrf_token %} 
+            <div class="windows-form-title">Windows Completed</div>
+            <div class="windows-input-group">
+                <input type="number" class="windows-input" value="{{ project.stage9_window }}" min="0" max="{{ project.windows }}" disabled>
+                <span class="windows-label">/ {{ project.windows }}</span>
+            </div>
+            <div class="windows-progress">
+                <span>Progress:</span>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: {{ project.stage9_progress_percentage }}%"></div>
+                </div>
+                <span>{{ project.stage9_progress_percentage }}%</span>
+            </div>
+            <input type="hidden" name="project_id" value="{{ project.id }}" disabled>
+            <button type="submit" name="edit_stage9" class="windows-submit" disabled>
+                <i class='bx bx-save'></i> Update
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    {% if project.stage9_progress_percentage != 100 and project.current_stage == 9 %}
+    <form method="post" action="{% url 'project_flow' %}" class="stage-complete-form">
+        {% csrf_token %}
+        <input type="hidden" name="project_id" value="{{ project.id }}">
+        <button type="submit" name="stage9_complete" class="stage-button">
+            <i class='bx bx-check-circle'></i> Mark Stage Complete
+        </button>
+    </form>
+    {% else %}
+    <form class="stage-complete-form">
+        <button type="button" class="stage-button" disabled>
+            <i class='bx bx-check-circle'></i> Mark Stage Complete
+        </button>
+    </form>
+    {% endif %}
+</td>
+
+<!-- stage9 ends -->
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Fix sidebar interaction issues
+        const sidebar = document.querySelector('.sidebar');
+        const content = document.querySelector('.content-wrapper');
+        
+        // If sidebar exists, handle its interactions
+        if (sidebar) {
+            const sidebarToggle = document.querySelector('.sidebar-toggle');
+            
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    document.body.classList.toggle('sidebar-open');
+                    
+                    // Adjust content margin when sidebar is toggled
+                    if (window.innerWidth > 992) {
+                        if (document.body.classList.contains('sidebar-open')) {
+                            content.style.marginLeft = sidebar.offsetWidth + 'px';
+                        } else {
+                            content.style.marginLeft = '0';
+                        }
+                    }
+                });
+            }
+            
+            // Adjust content on window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 992 && document.body.classList.contains('sidebar-open')) {
+                    content.style.marginLeft = sidebar.offsetWidth + 'px';
+                } else {
+                    content.style.marginLeft = '0';
+                }
+            });
+            
+            // Initial adjustment
+            if (window.innerWidth > 992 && document.body.classList.contains('sidebar-open')) {
+                content.style.marginLeft = sidebar.offsetWidth + 'px';
+            }
+        }
+        
+        // Fix table scrolling on mobile
+        const tableContainer = document.querySelector('.projects-table-container');
+        if (tableContainer) {
+            // Add momentum scrolling for iOS
+            tableContainer.style.WebkitOverflowScrolling = 'touch';
+            
+            // Prevent body scrolling when scrolling inside table on mobile
+            tableContainer.addEventListener('touchmove', function(e) {
+                e.stopPropagation();
+            }, { passive: true });
+        }
+    });
+</script>
+
+{% endblock %}

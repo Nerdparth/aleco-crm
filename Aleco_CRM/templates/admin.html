@@ -1,0 +1,514 @@
+{% extends 'base.html' %}
+{% block title %} Admin Dashboard {% endblock %}
+{% block content %}
+<style>
+    :root {
+        --primary-bg: #2b344d;
+        --card-bg: #2b344d;
+        --accent-color: #3b82f6;
+        --text-primary: #ffffff;
+        --text-secondary: #94a3b8;
+        --success: #22c55e;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --card-border: rgba(59, 130, 246, 0.1);
+        --gradient-start: #3b82f6;
+        --gradient-end: #8b5cf6;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        background-color: var(--primary-bg);
+        color: var(--text-primary);
+        line-height: 1.6;
+        min-height: 100vh;
+    }
+
+    .content-wrapper {
+        width: 100%;
+        padding: 1rem;
+        overflow-x: hidden;
+    }
+
+    .container {
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(to right, #3d3d3d, #333333);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .admin-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .admin-card {
+        background: var(--card-bg);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        border: 1px solid var(--card-border);
+        height: 100%;
+    }
+
+    .admin-card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .admin-card-title i {
+        color: var(--accent-color);
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .form-input,
+    .form-select {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--card-border);
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+    }
+
+    .form-input:focus,
+    .form-select:focus {
+        outline: none;
+        border-color: var(--accent-color);
+    }
+
+    .form-select option {
+        background-color: var(--card-bg);
+        color: var(--text-primary);
+    }
+
+    .form-submit {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--accent-color);
+        border: 1px solid var(--accent-color);
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    .form-submit:hover {
+        background: var(--accent-color);
+        color: white;
+    }
+
+    /* Toggle Switch */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255, 255, 255, 0.1);
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: var(--accent-color);
+    }
+
+    input:focus + .slider {
+        box-shadow: 0 0 1px var(--accent-color);
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+
+    .toggle-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .toggle-label {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .site-list {
+        max-height: 300px;
+        overflow-y: auto;
+        margin-top: 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid var(--card-border);
+    }
+
+    .site-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--card-border);
+    }
+
+    .site-item:last-child {
+        border-bottom: none;
+    }
+
+    .site-name {
+        font-size: 0.875rem;
+        color: var(--text-primary);
+    }
+
+    .site-status {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 1rem;
+    }
+
+    .site-status.active {
+        background: rgba(34, 197, 94, 0.1);
+        color: var(--success);
+    }
+
+    .site-status.inactive {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .status-badge.online {
+        background: rgba(34, 197, 94, 0.1);
+        color: var(--success);
+    }
+
+    .status-badge.maintenance {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning);
+    }
+
+    /* Fix for sidebar interaction */
+    #content-main {
+        width: 100%;
+        transition: margin-left 0.3s ease;
+        overflow-x: hidden;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1200px) {
+        .admin-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .content-wrapper {
+            padding: 0.75rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .admin-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Fix for mobile sidebar overlay */
+    @media (max-width: 992px) {
+        .sidebar-open #content-main {
+            margin-left: 0 !important;
+        }
+    }
+</style>
+
+<div class="content-wrapper">
+    <div class="container">
+        <h1 class="page-title">Admin Dashboard</h1>
+        
+        <div class="admin-grid">
+            <!-- System Status Card -->
+            <div class="admin-card">
+                <h2 class="admin-card-title">
+                    <i class='bx bx-cog'></i> System Status
+                </h2>
+                
+                <div class="toggle-container">
+                    <span class="toggle-label">Maintenance Mode</span>
+                    <form method="post" action="{% url 'custom_admin_view' %}" style="display: inline;">
+                        {% csrf_token %}
+                        <label class="switch">
+                            {% if maintenance_mode == True %}
+                            <input type="checkbox" name="maintenance_mode" checked onchange="this.form.submit()">
+                            {% elif maintenance_mode == False %}
+                            <input type="checkbox" name="maintenance_mode" onchange="this.form.submit()">
+                            {% endif %}
+                            <span class="slider"></span>
+                        </label>
+                        <!-- <input type="hidden" name="action" value="toggle_maintenance"> -->
+                    </form>
+                </div>
+                
+                <div class="system-status">
+                    <p>Current Status: 
+                        {% if maintenance_mode %}
+                        <span class="status-badge maintenance">Maintenance</span>
+                        {% else %}
+                        <span class="status-badge online">Online</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Create Site Card -->
+            <div class="admin-card">
+                <h2 class="admin-card-title">
+                    <i class='bx bx-building-house'></i> Create New Site
+                </h2>
+                
+                <form method="post" action="{% url 'custom_admin_view' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="create_site">
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="site_name">Site Name</label>
+                        <input type="text" id="site_name" name="site_name" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="site_address">Address</label>
+                        <input type="text" id="site_address" name="site_address" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="total_windows">Total Windows</label>
+                        <input type="number" id="total_windows" name="total_windows" class="form-input" min="1" required>
+                    </div>
+                    
+                    <button type="submit" class="form-submit">
+                        <i class='bx bx-plus-circle'></i> Create Site
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Assign Resources Card -->
+            <div class="admin-card">
+                <h2 class="admin-card-title">
+                    <i class='bx bx-package'></i> Assign Resources
+                </h2>
+                
+                <form method="post" action="{% url 'custom_admin_view' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="assign_resources">
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="resource_site">Select Site</label>
+                        <select id="resource_site" name="resource_site" class="form-select" required>
+                            <option value="">-- Select Site --</option>
+                            <!-- {% for site in sites %}
+                            <option value="{{ site.id }}">{{ site.name }}</option>
+                            {% endfor %} -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="resource_item">Select Item</label>
+                        <select id="resource_item" name="resource_item" class="form-select" required>
+                            <option value="">-- Select Item --</option>
+                            <!-- {% for item in inventory_items %}
+                            <option value="{{ item.id }}">{{ item.name }} ({{ item.available_quantity }} available)</option>
+                            {% endfor %} -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="resource_quantity">Quantity</label>
+                        <input type="number" id="resource_quantity" name="resource_quantity" class="form-input" min="1" required>
+                    </div>
+                    
+                    <button type="submit" class="form-submit">
+                        <i class='bx bx-transfer'></i> Assign Resources
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Update Site Progress Card -->
+            <div class="admin-card">
+                <h2 class="admin-card-title">
+                    <i class='bx bx-trending-up'></i> Update Site Progress
+                </h2>
+                
+                <form method="post" action="{% url 'custom_admin_view' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_progress">
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="progress_site">Select Site</label>
+                        <select id="progress_site" name="progress_site" class="form-select" required onchange="updateStageInfo(this.value)">
+                            <option value="">-- Select Site --</option>
+                            <!-- {% for site in sites %}
+                            <option value="{{ site.id }}" data-stage="{{ site.current_stage }}">{{ site.name }} (Stage {{ site.current_stage }})</option>
+                            {% endfor %} -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="current_stage">Current Stage</label>
+                        <input type="text" id="current_stage" class="form-input" readonly>
+                        <input type="hidden" id="stage_number" name="stage_number">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="windows_completed">Windows Completed</label>
+                        <input type="number" id="windows_completed" name="windows_completed" class="form-input" min="0" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="toggle-container">
+                            <span class="toggle-label">Mark Stage Complete</span>
+                            <label class="switch">
+                                <input type="checkbox" name="mark_complete">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="form-submit">
+                        <i class='bx bx-save'></i> Update Progress
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Site Status Management Card -->
+            <div class="admin-card">
+                <h2 class="admin-card-title">
+                    <i class='bx bx-toggle-left'></i> Site Status Management
+                </h2>
+                
+                <div class="site-list">
+                    <!-- {% for site in sites %}
+                    <div class="site-item">
+                        <span class="site-name">{{ site.name }}</span>
+                        <form method="post" action="{% url 'custom_admin_view' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="toggle_site_status">
+                            <input type="hidden" name="site_id" value="{{ site.id }}">
+                            <label class="switch" style="transform: scale(0.8);">
+                                <input type="checkbox" name="site_active" {% if site.is_active %}checked{% endif %} onchange="this.form.submit()">
+                                <span class="slider"></span>
+                            </label>
+                        </form>
+                        <span class="site-status {% if site.is_active %}active{% else %}inactive{% endif %}">
+                            {% if site.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </div>
+                    {% endfor %} -->
+                </div>
+            </div>
+            
+            <!-- Quick Stats Card -->
+        </div>
+    </div>
+</div>
+
+<script>
+    
+        // Fix sidebar interaction issues
+       
+    
+    // Function to update stage information when site is selected
+    function updateStageInfo(siteId) {
+        if (!siteId) {
+            document.getElementById('current_stage').value = '';
+            document.getElementById('stage_number').value = '';
+            return;
+        }
+        
+        const selectedOption = document.querySelector(`#progress_site option[value="${siteId}"]`);
+        const currentStage = selectedOption.getAttribute('data-stage');
+        
+        let stageName = '';
+        switch(currentStage) {
+            case '1': stageName = 'Stage 1: Measurement'; break;
+            case '2': stageName = 'Stage 2: Cutting'; break;
+            case '3': stageName = 'Stage 3: Jali'; break;
+            case '4': stageName = 'Stage 4: Quality Check'; break;
+            case '5': stageName = 'Stage 5: Installation'; break;
+            default: stageName = 'Unknown Stage';
+        }
+        
+        document.getElementById('current_stage').value = stageName;
+        document.getElementById('stage_number').value = currentStage;
+    }
+</script>
+{% endblock %}
