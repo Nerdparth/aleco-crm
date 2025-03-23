@@ -15,7 +15,7 @@ def dashboard_view(request):
     measurements_pending_count = len(meseaurements_pending_getter)
     cutting_pending_getter = Projects.objects.filter(is_active = True, stage1 = True, stage2 = False, stage3 = False, stage4 = False, stage5 = False, stage6 = False, stage7 = False, stage8 = False, stage9 = False)
     cutting_pending_count = len(cutting_pending_getter)
-    orders_pending_getter = Projects.objects.filter(is_active = True, stage1 = True, stage2 = False, stage3 = False, stage4 = False, stage5 = False, stage6 = False, stage7 = False, stage8 = False, stage9 = False, is_ordered = False)
+    orders_pending_getter = Projects.objects.filter(is_active = True, stage1 = True, stage2 = True, stage3 = True, stage4 = True, stage5 = True, stage6 = False, stage7 = False, stage8 = False, stage9 = False, is_ordered = False)
     orders_pending_count = len(orders_pending_getter)
     measurements_completed_count = active_projects_count - measurements_pending_count
     cutting_completed_count = active_projects_count - cutting_pending_count
