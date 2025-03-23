@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aleco - Login</title>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+</head>
+<style>
+    /* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    background: linear-gradient(to bottom, #2b344d, #000000);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Animated Background */
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+}
+
+.particle::before {
+    content: '';
+    position: absolute;
+    width: 100px;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.1), transparent);
+    transform-origin: left;
+    animation: particleConnection 8s infinite;
+}
+
+.particle:nth-child(1) { top: 20%; left: 20%; animation: float 12s infinite; }
+.particle:nth-child(2) { top: 60%; left: 80%; animation: float 10s infinite 1s; }
+.particle:nth-child(3) { top: 40%; left: 40%; animation: float 11s infinite 2s; }
+.particle:nth-child(4) { top: 80%; left: 30%; animation: float 9s infinite 3s; }
+.particle:nth-child(5) { top: 30%; left: 70%; animation: float 13s infinite 4s; }
+.particle:nth-child(6) { top: 70%; left: 50%; animation: float 10s infinite 5s; }
+.particle:nth-child(7) { top: 50%; left: 90%; animation: float 12s infinite 6s; }
+.particle:nth-child(8) { top: 90%; left: 10%; animation: float 11s infinite 7s; }
+.particle:nth-child(9) { top: 10%; left: 50%; animation: float 9s infinite 8s; }
+.particle:nth-child(10) { top: 45%; left: 25%; animation: float 13s infinite 9s; }
+.particle:nth-child(11) { top: 45%; left: 25%; animation: float 13s infinite 9s; }
+.particle:nth-child(12) { top: 45%; left: 25%; animation: float 13s infinite 9s; }
+.particle:nth-child(13) { top: 45%; left: 25%; animation: float 13s infinite 9s; }
+.particle:nth-child(14) { top: 45%; left: 25%; animation: float 13s infinite 9s; }
+.particle:nth-child(15) { top: 45%; left: 25%; animation: float 13s infinite 9s; }
+.particle:nth-child(16) { top: 45%; left: 25%; animation: float 13s infinite 9s; }
+.particle:nth-child(17) { top: 45%; left: 25%; animation: float 13s infinite 9s; }
+
+@keyframes float {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+    }
+    25% {
+        transform: translate(50px, 50px) scale(1.2);
+    }
+    50% {
+        transform: translate(0, 100px) scale(1);
+    }
+    75% {
+        transform: translate(-50px, 50px) scale(0.8);
+    }
+}
+
+@keyframes particleConnection {
+    0%, 100% {
+        transform: rotate(0deg) scaleX(1);
+        opacity: 0;
+    }
+    25% {
+        transform: rotate(45deg) scaleX(1.5);
+        opacity: 1;
+    }
+    50% {
+        transform: rotate(90deg) scaleX(1);
+        opacity: 0;
+    }
+    75% {
+        transform: rotate(-45deg) scaleX(1.5);
+        opacity: 1;
+    }
+}
+
+.container {
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Logo section styles */
+.logo-section {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.company-name {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #ffffff 0%, #a8a8a8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    position: relative;
+}
+
+.company-name::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ffffff, transparent);
+}
+
+.logo {
+    display: inline-flex;
+    padding: 1rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.logo::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    padding: 2px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+}
+
+.logo svg {
+    color: #ffffff;
+}
+
+.logo-section h2 {
+    font-size: 1.875rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.logo-section p {
+    color: #9ca3af;
+}
+
+/* Login card styles */
+.login-card {
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.login-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%);
+    animation: cardGlow 10s infinite linear;
+    pointer-events: none;
+}
+
+@keyframes cardGlow {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Form styles */
+.form-group {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.875rem;
+    color: #d1d5db;
+    margin-bottom: 0.5rem;
+}
+
+.input-group {
+    position: relative;
+}
+
+.input-group .icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    pointer-events: none;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid #4b5563;
+    border-radius: 0.5rem;
+    color: #ffffff;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+}
+
+.input-group input::placeholder {
+    color: #9ca3af;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #ffffff;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Button styles */
+.login-button {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #ffffff;
+    color: #000000;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: 0.5s;
+}
+
+.login-button:hover {
+    background-color: #f3f4f6;
+    transform: translateY(-2px);
+}
+
+.login-button:hover::before {
+    left: 100%;
+}
+
+.login-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+/* Sign up link styles */
+.signup-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.875rem;
+    color: #9ca3af;
+}
+
+.signup-link a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 500;
+    margin-left: 0.25rem;
+    transition: color 0.2s;
+}
+
+.signup-link a:hover {
+    color: #d1d5db;
+}
+</style>
+<body>
+    <!-- Animated Background -->
+    <div class="background">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="container">
+        <div class="login-card">
+            <!-- Logo Section -->
+            <div class="logo-section">
+                <div class="company-name">Aleco Admin</div>
+                <div class="logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <h2>Welcome Admin</h2>
+                <p>Please sign in to continue</p>
+            </div>
+
+            <!-- Login Form -->
+            <form class="login-form" method="post" action="{% url 'login_view' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <div class="input-group">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="8" r="4"></circle>
+                            <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+                        </svg>
+                        <input type="text" id="email" name="username" placeholder="Enter your username" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="login-button">Sign in</button>
+
+                <div class="signup-link">
+                    Not an Admin? <a href="{% url 'dashboard' %}">Go Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

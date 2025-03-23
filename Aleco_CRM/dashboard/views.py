@@ -1,8 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Projects, Inventory, Progress, InventoryHistory, MaintenanceMode
 from django.utils import timezone
+from django.contrib import messages
 
 def dashboard_view(request):
+    user = request.user
+    if not user.is_authenticated:
+        maintenance_mode = MaintenanceMode.objects.get(id=1).maintenace_mode
+        if maintenance_mode == True:
+            return redirect(maintenance_view)
     projects = Projects.objects.filter(is_active = True)
     active_projects_count = len(projects)
     meseaurements_pending_getter = Projects.objects.filter(is_active = True, stage1 = False, stage2 = False, stage3 = False, stage4 = False, stage5 = False, stage6 = False, stage7 = False, stage8 = False, stage9 = False)
@@ -25,6 +31,11 @@ def dashboard_view(request):
 
 
 def projects_view(request):
+    user = request.user
+    if not user.is_authenticated:
+        maintenance_mode = MaintenanceMode.objects.get(id=1).maintenace_mode
+        if maintenance_mode == True:
+            return redirect(maintenance_view)
     projects_getter = Projects.objects.filter(is_active=True)
     projects = []
 
@@ -63,6 +74,11 @@ def projects_view(request):
 
 
 def inventory_view(request):
+    user = request.user
+    if not user.is_authenticated:
+        maintenance_mode = MaintenanceMode.objects.get(id=1).maintenace_mode
+        if maintenance_mode == True:
+            return redirect(maintenance_view)
     items_getter = Inventory.objects.all()
     items = []
     low = []
@@ -127,11 +143,22 @@ def inventory_view(request):
     return render(request, 'inventory.html', {'items': items,'out_of_stock_count': out_of_stock_count, 'low_count': low_count, 'total_items_quantity': total_items_quantity})
 
 
-def profile_view(request):
-    return render(request, 'profile.html')
+def maintenance_view(request):
+    maintenance_mode = MaintenanceMode.objects.get(id=1).maintenace_mode
+    if maintenance_mode == False:
+        return redirect("dashboard")
+    user = request.user
+    if user.is_authenticated:
+        return redirect ("custom_admin_view")
+    return render(request, 'maintenance.html')
 
 
 def project_flow(request):
+    user = request.user
+    if not user.is_authenticated:
+        maintenance_mode = MaintenanceMode.objects.get(id=1).maintenace_mode
+        if maintenance_mode == True:
+            return redirect(maintenance_view)
     projects_getter = Projects.objects.filter(is_active=True)
     projects = []
     for project in projects_getter:
@@ -413,6 +440,11 @@ def project_flow(request):
 
 
 def project_details(request, project_name):
+    user = request.user
+    if not user.is_authenticated:
+        maintenance_mode = MaintenanceMode.objects.get(id=1).maintenace_mode
+        if maintenance_mode == True:
+            return redirect(maintenance_view)
     project = get_object_or_404(Projects, name=project_name)
     progress = Progress.objects.get(project=project)
     stage1_progress_percentage = int((progress.stage1_window * 100) / project.windows)
@@ -424,7 +456,7 @@ def project_details(request, project_name):
     stage7_progress_percentage = int((progress.stage7_window * 100) / project.windows)
     stage8_progress_percentage = int((progress.stage8_window * 100) / project.windows)
     stage9_progress_percentage = int((progress.stage9_window * 100) / project.windows)
-    if project.stage1 and project.stage2 and project.stage3 and project.stage4 and project.stage5 and project.stage6 and project.stage8:
+    if project.stage1 and project.stage2 and project.stage3 and project.stage4 and project.stage5 and project.stage6 and project.stage7 and project.stage8:
             current_stage = 9
     elif project.stage1 and project.stage2 and project.stage3 and project.stage4 and project.stage5 and project.stage6 and project.stage7:
             current_stage = 8
@@ -474,17 +506,104 @@ def project_details(request, project_name):
 
 
 def custom_admin_view(request):
+    user = request.user
+    if not user.is_authenticated:
+        maintenance_mode = MaintenanceMode.objects.get(id=1).maintenace_mode
+        if maintenance_mode == True:
+            return redirect(maintenance_view)
     maintenance_mode_getter = MaintenanceMode.objects.get(id=1).maintenace_mode
+    sites_getter = Projects.objects.all()
+    sites = []
+    for site in sites_getter:
+        if site.stage1 and site.stage2 and site.stage3 and site.stage4 and site.stage5 and site.stage6 and site.stage7 and site.stage8:
+            current_stage = 8
+        elif site.stage1 and site.stage2 and site.stage3 and site.stage4 and site.stage5 and site.stage6 and site.stage7:
+            current_stage = 7
+        elif site.stage1 and site.stage2 and site.stage3 and site.stage4 and site.stage5 and site.stage6:
+            current_stage = 6
+        elif site.stage1 and site.stage2 and site.stage3 and site.stage4 and site.stage5:
+            current_stage = 5
+        elif site.stage1 and site.stage2 and site.stage3 and site.stage4:
+            current_stage = 4
+        elif site.stage1 and site.stage2 and site.stage3:
+            current_stage = 3
+        elif site.stage1 and site.stage2:
+            current_stage = 2
+        elif site.stage1:
+            current_stage = 1
+        else:
+            current_stage = 1
+        sites.append({
+            "id" : site.id,
+            "name" : site.name,
+            "current_stage" : current_stage,
+            "is_active" : site.is_active
+        })
+    items = Inventory.objects.filter(quantity__gt = 0)
     if request.method == 'POST':
-        maintenance_mode = request.POST.get('maintenance_mode')
-        if maintenance_mode == "on":
-            maintenance_mode_updater = MaintenanceMode.objects.get(id=1)
-            maintenance_mode_updater.maintenace_mode = True
-            maintenance_mode_updater.save()
-            return redirect("custom_admin_view") 
-        if maintenance_mode == None:
-            maintenance_mode_updater = MaintenanceMode.objects.get(id=1)
-            maintenance_mode_updater.maintenace_mode = False
-            maintenance_mode_updater.save()
+        if "maintenance_mode" in request.POST:
+            maintenance_mode = request.POST.get('maintenance_mode')
+            print(maintenance_mode)
+            if maintenance_mode == "on":
+                maintenance_mode_updater = MaintenanceMode.objects.get(id=1)
+                maintenance_mode_updater.maintenace_mode = True
+                maintenance_mode_updater.save()
+                return redirect("custom_admin_view") 
+            if maintenance_mode == "off":
+                maintenance_mode_updater = MaintenanceMode.objects.get(id=1)
+                maintenance_mode_updater.maintenace_mode = False
+                maintenance_mode_updater.save()
+                return redirect("custom_admin_view")
+        if "create_site" in request.POST:
+            site_name = request.POST.get("site_name")
+            site_address = request.POST.get("site_address")
+            site_description = request.POST.get("site_description")
+            total_windows = request.POST.get("total_windows")
+            project = Projects.objects.create(name = site_name, description = site_description, windows = total_windows, address = site_address)
+            Progress.objects.create(project = project)
             return redirect("custom_admin_view")
-    return render(request, "admin.html", {"maintenance_mode" : maintenance_mode_getter } )
+        if "assign_resources" in  request.POST:
+            site_id = request.POST.get('resource_site')
+            item_id = request.POST.get('resource_item')
+            item_quantity = request.POST.get('resource_quantity')
+            project_getter = get_object_or_404(Projects, id = site_id)
+            inventory_item_getter = get_object_or_404(Inventory, id=item_id)
+            inventory_item_quantity_getter = get_object_or_404(Inventory, id=item_id).quantity
+            if int(item_quantity) > inventory_item_getter.quantity:
+                messages.error(request, "insufficient stock in inventory")
+                return redirect("custom_admin_view")
+            else:
+                inventory_item_getter.quantity = inventory_item_quantity_getter - int(item_quantity) 
+                inventory_item_getter.save()
+                InventoryHistory.objects.create(inventory = inventory_item_getter, given_to = project_getter, quantity = item_quantity)
+                return redirect("custom_admin_view")
+        if "update_site" in request.POST:
+            progress_site = request.POST.get("progress_site")
+            stage_number = request.POST.get("stage_number")
+            windows_completed = request.POST.get("windows_completed")
+            to_be_updated_project =  get_object_or_404(Projects, id = progress_site)
+            progress_model_of_to_be_updated_project = get_object_or_404(Progress, project = to_be_updated_project)
+            if to_be_updated_project.windows < int(windows_completed):
+                messages.error(request, f"No of windows cannot be greater than {to_be_updated_project.windows} ")
+                return redirect("custom_admin_view")
+            elif to_be_updated_project.windows == int(windows_completed):
+                setattr(to_be_updated_project, f"stage{stage_number}", True)
+                setattr(to_be_updated_project, f"stage{stage_number}_date", timezone.now().date())
+                to_be_updated_project.save()
+                setattr(progress_model_of_to_be_updated_project, f"stage{stage_number}_window", windows_completed)
+                progress_model_of_to_be_updated_project.save()
+                return redirect("custom_admin_view")
+            else:
+                setattr(to_be_updated_project, f"stage{stage_number}", False)
+                to_be_updated_project.save()
+                setattr(progress_model_of_to_be_updated_project, f"stage{stage_number}_window", windows_completed)
+                progress_model_of_to_be_updated_project.save()
+                return redirect("custom_admin_view")
+        if "site_activity" in request.POST:
+            project_id_getter = request.POST.get("site_id")
+            project_to_be_inactive = get_object_or_404(Projects, id = project_id_getter)
+            project_to_be_inactive.is_active = not project_to_be_inactive.is_active
+            project_to_be_inactive.save()
+            return redirect("custom_admin_view")
+
+    return render(request, "admin.html", {"maintenance_mode" : maintenance_mode_getter, "sites" : sites, "inventory_items" : items } )

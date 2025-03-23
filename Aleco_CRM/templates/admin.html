@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
 {% block title %} Admin Dashboard {% endblock %}
 {% block content %}
+{% if user.is_authenticated %}
 <style>
     :root {
-        --primary-bg: #2b344d;
+        --primary-bg: #c4c4c5;
         --card-bg: #2b344d;
         --accent-color: #3b82f6;
         --text-primary: #ffffff;
@@ -83,6 +84,8 @@
     .form-group {
         margin-bottom: 1rem;
     }
+
+    
 
     .form-label {
         display: block;
@@ -197,7 +200,7 @@
     }
 
     .site-list {
-        max-height: 300px;
+        max-height: 100%;
         overflow-y: auto;
         margin-top: 1rem;
         border-radius: 0.5rem;
@@ -307,15 +310,17 @@
                     <span class="toggle-label">Maintenance Mode</span>
                     <form method="post" action="{% url 'custom_admin_view' %}" style="display: inline;">
                         {% csrf_token %}
+                        <!-- <input type="hidden" name="maintenance_mode" value="None"> -->
                         <label class="switch">
                             {% if maintenance_mode == True %}
+                            <input type="hidden" name="maintenance_mode" value="off">
                             <input type="checkbox" name="maintenance_mode" checked onchange="this.form.submit()">
                             {% elif maintenance_mode == False %}
                             <input type="checkbox" name="maintenance_mode" onchange="this.form.submit()">
                             {% endif %}
                             <span class="slider"></span>
                         </label>
-                        <!-- <input type="hidden" name="action" value="toggle_maintenance"> -->
+                        
                     </form>
                 </div>
                 
@@ -338,7 +343,7 @@
                 
                 <form method="post" action="{% url 'custom_admin_view' %}">
                     {% csrf_token %}
-                    <input type="hidden" name="action" value="create_site">
+                    <!-- <input type="hidden" name="action" value="create_site"> -->
                     
                     <div class="form-group">
                         <label class="form-label" for="site_name">Site Name</label>
@@ -349,13 +354,17 @@
                         <label class="form-label" for="site_address">Address</label>
                         <input type="text" id="site_address" name="site_address" class="form-input" required>
                     </div>
-                    
                     <div class="form-group">
+                        <label class="form-label" for="site_address">Description</label>
+                        <input type="text" id="site_address" name="site_description" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 30px;">
                         <label class="form-label" for="total_windows">Total Windows</label>
                         <input type="number" id="total_windows" name="total_windows" class="form-input" min="1" required>
                     </div>
                     
-                    <button type="submit" class="form-submit">
+                    <button type="submit" name="create_site" class="form-submit">
                         <i class='bx bx-plus-circle'></i> Create Site
                     </button>
                 </form>
@@ -371,23 +380,25 @@
                     {% csrf_token %}
                     <input type="hidden" name="action" value="assign_resources">
                     
-                    <div class="form-group">
+                    <div class="form-group cs-dropdown" style="position: relative;">
                         <label class="form-label" for="resource_site">Select Site</label>
                         <select id="resource_site" name="resource_site" class="form-select" required>
                             <option value="">-- Select Site --</option>
-                            <!-- {% for site in sites %}
+                            {% for site in sites %}
                             <option value="{{ site.id }}">{{ site.name }}</option>
-                            {% endfor %} -->
+                            {% endfor %}
                         </select>
+                        
                     </div>
+                    
                     
                     <div class="form-group">
                         <label class="form-label" for="resource_item">Select Item</label>
                         <select id="resource_item" name="resource_item" class="form-select" required>
                             <option value="">-- Select Item --</option>
-                            <!-- {% for item in inventory_items %}
-                            <option value="{{ item.id }}">{{ item.name }} ({{ item.available_quantity }} available)</option>
-                            {% endfor %} -->
+                            {% for item in inventory_items %}
+                            <option value="{{ item.id }}">{{ item.name }} ({{ item.quantity }} available)</option>
+                            {% endfor %}
                         </select>
                     </div>
                     
@@ -396,7 +407,7 @@
                         <input type="number" id="resource_quantity" name="resource_quantity" class="form-input" min="1" required>
                     </div>
                     
-                    <button type="submit" class="form-submit">
+                    <button type="submit" name="assign_resources" class="form-submit">
                         <i class='bx bx-transfer'></i> Assign Resources
                     </button>
                 </form>
@@ -410,15 +421,15 @@
                 
                 <form method="post" action="{% url 'custom_admin_view' %}">
                     {% csrf_token %}
-                    <input type="hidden" name="action" value="update_progress">
+                    <!-- <input type="hidden" name="action" value="update_progress"> -->
                     
                     <div class="form-group">
                         <label class="form-label" for="progress_site">Select Site</label>
                         <select id="progress_site" name="progress_site" class="form-select" required onchange="updateStageInfo(this.value)">
                             <option value="">-- Select Site --</option>
-                            <!-- {% for site in sites %}
+                            {% for site in sites %}
                             <option value="{{ site.id }}" data-stage="{{ site.current_stage }}">{{ site.name }} (Stage {{ site.current_stage }})</option>
-                            {% endfor %} -->
+                            {% endfor %}
                         </select>
                     </div>
                     
@@ -433,17 +444,9 @@
                         <input type="number" id="windows_completed" name="windows_completed" class="form-input" min="0" required>
                     </div>
                     
-                    <div class="form-group">
-                        <div class="toggle-container">
-                            <span class="toggle-label">Mark Stage Complete</span>
-                            <label class="switch">
-                                <input type="checkbox" name="mark_complete">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div>
+                   
                     
-                    <button type="submit" class="form-submit">
+                    <button type="submit" name="update_site" class="form-submit">
                         <i class='bx bx-save'></i> Update Progress
                     </button>
                 </form>
@@ -456,12 +459,12 @@
                 </h2>
                 
                 <div class="site-list">
-                    <!-- {% for site in sites %}
+                    {% for site in sites %}
                     <div class="site-item">
                         <span class="site-name">{{ site.name }}</span>
                         <form method="post" action="{% url 'custom_admin_view' %}" style="display: inline;">
                             {% csrf_token %}
-                            <input type="hidden" name="action" value="toggle_site_status">
+                            <input type="hidden" name="site_activity" value="toggle_site_status">
                             <input type="hidden" name="site_id" value="{{ site.id }}">
                             <label class="switch" style="transform: scale(0.8);">
                                 <input type="checkbox" name="site_active" {% if site.is_active %}checked{% endif %} onchange="this.form.submit()">
@@ -472,7 +475,7 @@
                             {% if site.is_active %}Active{% else %}Inactive{% endif %}
                         </span>
                     </div>
-                    {% endfor %} -->
+                    {% endfor %}
                 </div>
             </div>
             
@@ -500,10 +503,14 @@
         let stageName = '';
         switch(currentStage) {
             case '1': stageName = 'Stage 1: Measurement'; break;
-            case '2': stageName = 'Stage 2: Cutting'; break;
-            case '3': stageName = 'Stage 3: Jali'; break;
-            case '4': stageName = 'Stage 4: Quality Check'; break;
-            case '5': stageName = 'Stage 5: Installation'; break;
+            case '2': stageName = 'Stage 2: Cutting Frames'; break;
+            case '3': stageName = 'Stage 3: Cutting Stashes'; break;
+            case '4': stageName = 'Stage 4: Jalli Palle'; break;
+            case '5': stageName = 'Stage 5: Assembled'; break;
+            case '6': stageName = 'Stage 6: Packed'; break;
+            case '7': stageName = 'Stage 7: Beading'; break;
+            case '8': stageName = 'Stage 8: Delivered'; break;
+            case '9': stageName = 'Stage 9: Installation'; break;
             default: stageName = 'Unknown Stage';
         }
         
@@ -511,4 +518,19 @@
         document.getElementById('stage_number').value = currentStage;
     }
 </script>
+{% else %}
+<style>
+    body{
+        overflow: hidden;
+    }
+</style>
+
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center;gap: 10px;">
+    <h1>Admin Dashboard</h1>
+    <p style="margin-bottom: 0px;">You don't have access to this page 🥺</p>
+    <p>Please <a href="{% url 'login_view' %}">LogIn </a>as an Admin</p>
+</div>
+
+
+{% endif %}
 {% endblock %}

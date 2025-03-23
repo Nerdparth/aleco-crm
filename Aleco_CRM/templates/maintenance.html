@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aleco Windows - Maintenance</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+        
+        :root {
+            --primary-color: #3b82f6;
+            --text-color: #333333;
+            --light-text: #666666;
+            --warning-color: #f59e0b;
+            --background-gradient-start: #f9fafb;
+            --background-gradient-end: #e5e7f8;
+            --pink-blush: rgba(236, 72, 153, 0.15);
+            --blue-blush: rgba(59, 130, 246, 0.15);
+            --loader-color: #3b82f6;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Background blush effects */
+        .background-effects {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .blush {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+        }
+        
+        .pink-blush-1 {
+            width: 500px;
+            height: 500px;
+            background: var(--pink-blush);
+            top: -200px;
+            right: -100px;
+        }
+        
+        .blue-blush-1 {
+            width: 600px;
+            height: 600px;
+            background: var(--blue-blush);
+            bottom: -200px;
+            left: -200px;
+        }
+        
+        .pink-blush-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--pink-blush);
+            bottom: 10%;
+            right: 15%;
+        }
+        
+        .blue-blush-2 {
+            width: 400px;
+            height: 400px;
+            background: var(--blue-blush);
+            top: 10%;
+            left: 5%;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 5%;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-color);
+            text-decoration: none;
+        }
+        
+        .nav-link {
+            font-size: 1.1rem;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem 5%;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .warning-icon {
+            font-size: 4rem;
+            color: var(--warning-color);
+            margin-bottom: 1.5rem;
+        }
+        
+        .message {
+            font-size: 1.2rem;
+            color: var(--light-text);
+            margin-bottom: 1.5rem;
+            font-style: italic;
+        }
+        
+        .maintenance-title {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .highlight {
+            color: var(--primary-color);
+            margin-left: 0.5rem;
+        }
+        
+        .construction-emoji {
+            margin-left: 0.5rem;
+            font-size: 2rem;
+        }
+        
+        .contact-info {
+            font-size: 1.2rem;
+            color: var(--light-text);
+            margin-bottom: 1rem;
+        }
+        
+        .email {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .email:hover {
+            opacity: 0.8;
+        }
+        
+        /* Circular Loader */
+        .loader-container {
+            margin: 2rem 0;
+        }
+        
+        .circular-loader {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid rgba(59, 130, 246, 0.2);
+            border-top: 4px solid var(--loader-color);
+            animation: spin 1.5s linear infinite;
+            position: relative;
+        }
+        
+        .loader-inner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            border-right: 4px solid rgba(236, 72, 153, 0.7);
+            animation: spin-reverse 2s linear infinite;
+        }
+        
+        .loader-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), rgba(236, 72, 153, 0.7));
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes spin-reverse {
+            0% { transform: rotate(360deg); }
+            100% { transform: rotate(0deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+        }
+        
+        /* Responsive adjustments */
+        @media screen and (max-width: 768px) {
+            .header {
+                padding: 1.5rem 5%;
+            }
+            
+            .logo {
+                font-size: 1.5rem;
+            }
+            
+            .maintenance-title {
+                font-size: 2rem;
+            }
+            
+            .message, .contact-info {
+                font-size: 1rem;
+            }
+            
+            .blush {
+                filter: blur(60px);
+            }
+            
+            .pink-blush-1, .blue-blush-1 {
+                width: 400px;
+                height: 400px;
+            }
+            
+            .pink-blush-2, .blue-blush-2 {
+                width: 250px;
+                height: 250px;
+            }
+        }
+        
+        @media screen and (max-width: 480px) {
+            .header {
+                padding: 1rem 5%;
+            }
+            
+            .logo {
+                font-size: 1.3rem;
+            }
+            
+            .maintenance-title {
+                font-size: 1.7rem;
+            }
+            
+            .construction-emoji {
+                font-size: 1.5rem;
+            }
+            
+            .warning-icon {
+                font-size: 3rem;
+            }
+            
+            .circular-loader {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .loader-inner {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .blush {
+                filter: blur(40px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background blush effects -->
+    <div class="background-effects">
+        <div class="blush pink-blush-1"></div>
+        <div class="blush blue-blush-1"></div>
+        <div class="blush pink-blush-2"></div>
+        <div class="blush blue-blush-2"></div>
+    </div>
+    
+    <header class="header">
+        <a href="#" class="logo">Aleco Windows</a>
+        <a href="{% url 'login_view' %}" class="nav-link">Login</a>
+    </header>
+    
+    <main class="main-content">
+        <div class="warning-icon">
+            <i class='bx bxs-error-circle'></i>
+        </div>
+        
+        <p class="message">We are adding new Features to the site</p>
+        
+        <h1 class="maintenance-title">
+            This site is under <span class="highlight">Maintenance</span>
+            <span class="construction-emoji">🚧</span>
+        </h1>
+        
+        <!-- Circular Loader -->
+        <div class="loader-container">
+            <div class="circular-loader">
+                
+            </div>
+        </div>
+        
+        <p class="contact-info">For urgent concerns you may contact us directly</p>
+        <a href="#" class="email">at +91 85588 51943</a>
+    </main>
+</body>
+</html>
