@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Projects, Inventory, Progress, InventoryHistory, MaintenanceMode
+from .models import Projects, Inventory, Progress, InventoryHistory, MaintenanceMode, RecentActivity
 from django.utils import timezone
 from django.contrib import messages
+from datetime import timedelta
 
 def dashboard_view(request):
     user = request.user
@@ -9,6 +10,9 @@ def dashboard_view(request):
         maintenance_mode = MaintenanceMode.objects.get(id=1).maintenace_mode
         if maintenance_mode == True:
             return redirect(maintenance_view)
+    three_days_ago = timezone.now() - timedelta(days=5)
+    RecentActivity.objects.filter(timestamp__lt=three_days_ago).delete()
+    recent_activity = RecentActivity.objects.all().order_by('-timestamp')
     projects = Projects.objects.filter(is_active = True)
     active_projects_count = len(projects)
     meseaurements_pending_getter = Projects.objects.filter(is_active = True, stage1 = False, stage2 = False, stage3 = False, stage4 = False, stage5 = False, stage6 = False, stage7 = False, stage8 = False, stage9 = False)
@@ -26,7 +30,8 @@ def dashboard_view(request):
     "orders_pending_count": orders_pending_count,
     "measurements_completed_count": measurements_completed_count,
     "cutting_completed_count": cutting_completed_count,
-    "pending_orders_list" : orders_pending_getter
+    "pending_orders_list" : orders_pending_getter,
+    "recent_activity" : recent_activity
     }
     return render(request, 'dashboard.html', context )
 
@@ -254,6 +259,7 @@ def project_flow(request):
             project_update.save()
             progress_update.stage1_window = project_update.windows
             progress_update.save()
+            RecentActivity.objects.create(site = project_update, activity_type = "measurement")
             return redirect("project_flow")
         if "stage2_complete" in request.POST:
             project_id = request.POST.get('project_id')
@@ -264,6 +270,7 @@ def project_flow(request):
             project_update.save()
             progress_update.stage2_window = project_update.windows
             progress_update.save()
+            RecentActivity.objects.create(site = project_update, activity_type = "cutting frames")
             return redirect("project_flow")
         if "stage3_complete" in request.POST:
             project_id = request.POST.get('project_id')
@@ -274,6 +281,7 @@ def project_flow(request):
             project_update.save()
             progress_update.stage3_window = project_update.windows
             progress_update.save()
+            RecentActivity.objects.create(site = project_update, activity_type = "cutting sashes")
             return redirect("project_flow")
         if "stage4_complete" in request.POST:
             project_id = request.POST.get('project_id')
@@ -284,6 +292,7 @@ def project_flow(request):
             project_update.save()
             progress_update.stage4_window = project_update.windows
             progress_update.save()
+            RecentActivity.objects.create(site = project_update, activity_type = "jalli palle")
             return redirect("project_flow")
         if "stage5_complete" in request.POST:
             project_id = request.POST.get('project_id')
@@ -294,6 +303,7 @@ def project_flow(request):
             project_update.save()
             progress_update.stage5_window = project_update.windows
             progress_update.save()
+            RecentActivity.objects.create(site = project_update, activity_type = "assembled")
             return redirect("project_flow")
         if "stage6_complete" in request.POST:
             project_id = request.POST.get('project_id')
@@ -304,6 +314,7 @@ def project_flow(request):
             project_update.save()
             progress_update.stage6_window = project_update.windows
             progress_update.save()
+            RecentActivity.objects.create(site = project_update, activity_type = "packed")
             return redirect("project_flow")
         if "stage7_complete" in request.POST:
             project_id = request.POST.get('project_id')
@@ -314,6 +325,7 @@ def project_flow(request):
             project_update.save()
             progress_update.stage7_window = project_update.windows
             progress_update.save()
+            RecentActivity.objects.create(site = project_update, activity_type = "beading")
             return redirect("project_flow")
         if "stage8_complete" in request.POST:
             project_id = request.POST.get('project_id')
@@ -324,6 +336,7 @@ def project_flow(request):
             project_update.save()
             progress_update.stage8_window = project_update.windows
             progress_update.save()
+            RecentActivity.objects.create(site = project_update, activity_type = "delivered")
             return redirect("project_flow")
         if "stage9_complete" in request.POST:
             project_id = request.POST.get('project_id')
@@ -334,6 +347,7 @@ def project_flow(request):
             project_update.save()
             progress_update.stage9_window = project_update.windows
             progress_update.save()
+            RecentActivity.objects.create(site = project_update, activity_type = "installation")
             return redirect("project_flow")
         if "edit_stage1" in request.POST:
             project_id = request.POST.get('project_id')
@@ -348,6 +362,7 @@ def project_flow(request):
                 project_update.stage1 = True
             project_update.stage1_date = timezone.now().date()
             project_update.save()
+            RecentActivity.objects.create(site = project_update, activity_type = "measurement")
             return redirect("project_flow")
         if "edit_stage2" in request.POST:
             project_id = request.POST.get('project_id')
@@ -359,7 +374,7 @@ def project_flow(request):
                 project_update.stage2 = True
             project_update.stage2_date = timezone.now().date()
             project_update.save()
-            
+            RecentActivity.objects.create(site = project_update, activity_type = "cutting frames")
             return redirect("project_flow")
         if "edit_stage3" in request.POST:
             project_id = request.POST.get('project_id')
@@ -371,6 +386,7 @@ def project_flow(request):
                 project_update.stage3 = True
             project_update.stage3_date = timezone.now().date()
             project_update.save()
+            RecentActivity.objects.create(site = project_update, activity_type = "cutting sashes")
             return redirect("project_flow")
         if "edit_stage4" in request.POST:
             project_id = request.POST.get('project_id')
@@ -382,6 +398,7 @@ def project_flow(request):
                 project_update.stage4 = True
             project_update.stage4_date = timezone.now().date()
             progress_update.save()
+            RecentActivity.objects.create(site = project_update, activity_type = "jalli palle")
             return redirect("project_flow")
         if "edit_stage5" in request.POST:
             project_id = request.POST.get('project_id')
@@ -394,6 +411,7 @@ def project_flow(request):
             project_update.stage5_date = timezone.now().date()
             
             progress_update.save()
+            RecentActivity.objects.create(site = project_update, activity_type = "assembled")
             return redirect("project_flow")
         if "edit_stage6" in request.POST:
             project_id = request.POST.get('project_id')
@@ -406,6 +424,7 @@ def project_flow(request):
             project_update.stage6_date = timezone.now().date()
             
             progress_update.save()
+            RecentActivity.objects.create(site = project_update, activity_type = "packed")
             return redirect("project_flow")
         if "edit_stage7" in request.POST:
             project_id = request.POST.get('project_id')
@@ -418,6 +437,7 @@ def project_flow(request):
             project_update.stage7_date = timezone.now().date()
             
             progress_update.save()
+            RecentActivity.objects.create(site = project_update, activity_type = "beading")
             return redirect("project_flow")
         if "edit_stage8" in request.POST:
             project_id = request.POST.get('project_id')
@@ -430,6 +450,7 @@ def project_flow(request):
             project_update.stage8_date = timezone.now().date()
             
             progress_update.save()
+            RecentActivity.objects.create(site = project_update, activity_type = "delivered")
             return redirect("project_flow")
         if "edit_stage9" in request.POST:
             project_id = request.POST.get('project_id')
@@ -442,6 +463,7 @@ def project_flow(request):
             project_update.stage9_date = timezone.now().date()
             
             progress_update.save()
+            RecentActivity.objects.create(site = project_update, activity_type = "installation")
             return redirect("project_flow")
     return render(request, 'project-flow.html', {'projects': projects,'orders_pending_count' : orders_pending_count, "pending_orders_list" : orders_pending_getter})
 
@@ -574,6 +596,7 @@ def custom_admin_view(request):
             total_windows = request.POST.get("total_windows")
             project = Projects.objects.create(name = site_name, description = site_description, windows = total_windows, address = site_address)
             Progress.objects.create(project = project)
+            RecentActivity.objects.create(site = project, activity_type = "new-site")
             return redirect("custom_admin_view")
         if "assign_resources" in  request.POST:
             site_id = request.POST.get('resource_site')
@@ -589,6 +612,7 @@ def custom_admin_view(request):
                 inventory_item_getter.quantity = inventory_item_quantity_getter - int(item_quantity) 
                 inventory_item_getter.save()
                 InventoryHistory.objects.create(inventory = inventory_item_getter, given_to = project_getter, quantity = item_quantity)
+                RecentActivity.objects.create(site = project_getter, activity_type = "inventory")
                 return redirect("custom_admin_view")
         if "update_site" in request.POST:
             progress_site = request.POST.get("progress_site")
@@ -605,12 +629,14 @@ def custom_admin_view(request):
                 to_be_updated_project.save()
                 setattr(progress_model_of_to_be_updated_project, f"stage{stage_number}_window", windows_completed)
                 progress_model_of_to_be_updated_project.save()
+                RecentActivity.objects.create(site = to_be_updated_project, activity_type = "updated")
                 return redirect("custom_admin_view")
             else:
                 setattr(to_be_updated_project, f"stage{stage_number}", False)
                 to_be_updated_project.save()
                 setattr(progress_model_of_to_be_updated_project, f"stage{stage_number}_window", windows_completed)
                 progress_model_of_to_be_updated_project.save()
+                RecentActivity.objects.create(site = to_be_updated_project, activity_type = "updated")
                 return redirect("custom_admin_view")
         if "site_activity" in request.POST:
             project_id_getter = request.POST.get("site_id")
@@ -629,4 +655,5 @@ def accept_order(request):
             project = get_object_or_404(Projects, id=project_id)
             project.is_ordered = True
             project.save()
+            RecentActivity.objects.create(site = project, activity_type = "ordered")
     return redirect(request.META.get('HTTP_REFERER', '/'))

@@ -287,41 +287,26 @@
                     <thead>
                         <tr>
                             <th>Site</th>
-                            <th>Current Stage</th>
+                            <th>Activity Type</th>
                             <th>Timestamp</th>
                         </tr>
                     </thead>
                     <tbody>
+                        {% if recent_activity %}
+                        {% for recent in recent_activity %}
                         <tr>
-                            <td>System Update</td>
-                            <td><span class="status completed">Completed</span></td>
-                            <td>2024-03-15 14:30</td>
+                            <td>{{ recent.site }}</td>
+                            <td><span class="status completed">{{ recent.activity_type }}</span></td>
+                            <td>{{ recent.timestamp }}</td>
                         </tr>
+                        {% endfor %}
+                        {% else %}
                         <tr>
-                            <td>Backup Process</td>
-                            <td><span class="status in-progress">In Progress</span></td>
-                            <td>2024-03-15 14:25</td>
+                            <td>No Recent Activity within 5 days</td>
+                            <td><span class="status completed">...</span></td>
+                            <td>...</td>
                         </tr>
-                        <tr>
-                            <td>Security Scan</td>
-                            <td><span class="status pending">Pending</span></td>
-                            <td>2024-03-15 14:20</td>
-                        </tr>
-                        <tr>
-                            <td>Security Scan</td>
-                            <td><span class="status pending">Pending</span></td>
-                            <td>2024-03-15 14:20</td>
-                        </tr>
-                        <tr>
-                            <td>Security Scan</td>
-                            <td><span class="status pending">Pending</span></td>
-                            <td>2024-03-15 14:20</td>
-                        </tr>
-                        <tr>
-                            <td>Data Sync</td>
-                            <td><span class="status completed">Completed</span></td>
-                            <td>2024-03-15 14:15</td>
-                        </tr>
+                        {% endif %}
                     </tbody>
                 </table>
             </div>

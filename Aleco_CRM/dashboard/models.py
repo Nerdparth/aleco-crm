@@ -90,4 +90,11 @@ class MaintenanceMode(models.Model):
     maintenace_mode = models.BooleanField(default=False)
 
 
+class RecentActivity(models.Model):
+    type_choices = [('measurement', 'measurement'),('cutting frames', 'cutting frames'),('cutting sashes', 'cutting sashes'),('jalli palle', 'jalli palle'),('assembled', 'assembled'),('packed', 'packed'),('beading', 'beading'),('delivered', 'delivered'),('installation', 'installation'),('inventory', 'inventory'),('ordered', 'ordered'),('updated', 'updated'), ('new-site', 'new-site')]
+    site = models.ForeignKey(Projects, on_delete=models.CASCADE)
+    activity_type = models.CharField(max_length=250, choices=type_choices)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+
     
