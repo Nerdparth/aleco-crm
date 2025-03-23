@@ -62,12 +62,16 @@ a {
 
 .header_img {
     width: 35px;
-    height: 35px;
+    height: 65px;
     display: flex;
+    align-items: center;
     justify-content: center;
     border-radius: 50%;
     overflow: hidden;
     object-fit: cover;
+    color: #333;
+            cursor: pointer;
+    
 }
 
 .header_img img {
@@ -158,6 +162,51 @@ a {
     height: 100vh;
 }
 
+.notification-badge {
+            position: absolute;
+            top: 28px;
+            right: 38px;
+            background: red;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: translate(50%, -50%);
+        }
+
+        .notification-panel {
+            position: absolute;
+            top: 40px;
+            right: 0;
+            width: 250px;
+            background: white;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            display: none; /* Initially hidden */
+            padding: 10px;
+        }
+
+        .notification-panel p {
+            margin: 0;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        .notification-panel p:last-child {
+            border-bottom: none;
+        }
+
+        /* Show panel when hovered */
+        .header_img:hover .notification-panel {
+            display: block;
+        }
+
 /* Desktop styles */
 @media screen and (min-width: 768px) {
     body {
@@ -235,8 +284,22 @@ a {
 </style>
 <body id="body-pd">
     <header class="header" id="header">
-        <div class="header_toggle"> <i class='bx bx-menu' id="header-toggle"></i> </div>
-        <div class="header_img"> <img src="https://cdn.dribbble.com/userupload/23119919/file/original-31d2d4d3a75b841da69355d6434d542c.gif" alt=""> </div>
+        <div class="header_toggle"> 
+            <i class='bx bx-menu' id="header-toggle"></i> 
+        </div>
+        <div class="header_img"> 
+            <i class='bx bx-bell' style="color: #111; font-size: 25px;"></i>
+            <span class="notification-badge">{{ orders_pending_count }}</span>
+            <div class="notification-panel">
+                {% if orders_pending_count == 0 %}
+                    <p>No Orders to place, Everything up-to-date</p>
+                {% else %}
+                    {% for order in pending_orders_list %}
+                        <p>🔔 Order pending for site {{ order.name }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
     </header>
     <div class="l-navbar" id="nav-bar">
         <nav class="nav">

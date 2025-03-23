@@ -25,7 +25,8 @@ def dashboard_view(request):
     "cutting_pending_count": cutting_pending_count,
     "orders_pending_count": orders_pending_count,
     "measurements_completed_count": measurements_completed_count,
-    "cutting_completed_count": cutting_completed_count
+    "cutting_completed_count": cutting_completed_count,
+    "pending_orders_list" : orders_pending_getter
     }
     return render(request, 'dashboard.html', context )
 
@@ -36,6 +37,8 @@ def projects_view(request):
         maintenance_mode = MaintenanceMode.objects.get(id=1).maintenace_mode
         if maintenance_mode == True:
             return redirect(maintenance_view)
+    orders_pending_getter = Projects.objects.filter(is_active = True, stage1 = True, stage2 = True, stage3 = True, stage4 = True, stage5 = True, stage6 = False, stage7 = False, stage8 = False, stage9 = False, is_ordered = False)
+    orders_pending_count = len(orders_pending_getter)
     projects_getter = Projects.objects.filter(is_active=True)
     projects = []
 
@@ -70,7 +73,7 @@ def projects_view(request):
             'created_at': project.created_at
         })
 
-    return render(request, 'projects.html', {'projects': projects})
+    return render(request, 'projects.html', {'projects': projects, 'orders_pending_count' : orders_pending_count, "pending_orders_list" : orders_pending_getter})
 
 
 def inventory_view(request):
@@ -79,6 +82,8 @@ def inventory_view(request):
         maintenance_mode = MaintenanceMode.objects.get(id=1).maintenace_mode
         if maintenance_mode == True:
             return redirect(maintenance_view)
+    orders_pending_getter = Projects.objects.filter(is_active = True, stage1 = True, stage2 = True, stage3 = True, stage4 = True, stage5 = True, stage6 = False, stage7 = False, stage8 = False, stage9 = False, is_ordered = False)
+    orders_pending_count = len(orders_pending_getter)
     items_getter = Inventory.objects.all()
     items = []
     low = []
@@ -140,7 +145,7 @@ def inventory_view(request):
             item.quantity = request.POST.get('quantity')
             item.save()
             return redirect("inventory")
-    return render(request, 'inventory.html', {'items': items,'out_of_stock_count': out_of_stock_count, 'low_count': low_count, 'total_items_quantity': total_items_quantity})
+    return render(request, 'inventory.html', {'items': items,'out_of_stock_count': out_of_stock_count, 'low_count': low_count, 'total_items_quantity': total_items_quantity, 'orders_pending_count' : orders_pending_count, "pending_orders_list" : orders_pending_getter})
 
 
 def maintenance_view(request):
@@ -159,6 +164,8 @@ def project_flow(request):
         maintenance_mode = MaintenanceMode.objects.get(id=1).maintenace_mode
         if maintenance_mode == True:
             return redirect(maintenance_view)
+    orders_pending_getter = Projects.objects.filter(is_active = True, stage1 = True, stage2 = True, stage3 = True, stage4 = True, stage5 = True, stage6 = False, stage7 = False, stage8 = False, stage9 = False, is_ordered = False)
+    orders_pending_count = len(orders_pending_getter)
     projects_getter = Projects.objects.filter(is_active=True)
     projects = []
     for project in projects_getter:
@@ -436,7 +443,7 @@ def project_flow(request):
             
             progress_update.save()
             return redirect("project_flow")
-    return render(request, 'project-flow.html', {'projects': projects})
+    return render(request, 'project-flow.html', {'projects': projects,'orders_pending_count' : orders_pending_count, "pending_orders_list" : orders_pending_getter})
 
 
 def project_details(request, project_name):
@@ -445,6 +452,8 @@ def project_details(request, project_name):
         maintenance_mode = MaintenanceMode.objects.get(id=1).maintenace_mode
         if maintenance_mode == True:
             return redirect(maintenance_view)
+    orders_pending_getter = Projects.objects.filter(is_active = True, stage1 = True, stage2 = True, stage3 = True, stage4 = True, stage5 = True, stage6 = False, stage7 = False, stage8 = False, stage9 = False, is_ordered = False)
+    orders_pending_count = len(orders_pending_getter)
     project = get_object_or_404(Projects, name=project_name)
     progress = Progress.objects.get(project=project)
     stage1_progress_percentage = int((progress.stage1_window * 100) / project.windows)
@@ -499,7 +508,9 @@ def project_details(request, project_name):
         'stage9_progress_percentage': stage9_progress_percentage,
         'current_stage': current_stage,
         'inventory_history': inventory_history,
-        'last_updated_date' : getattr(project, f'stage{current_stage - 1}_date')
+        'last_updated_date' : getattr(project, f'stage{current_stage - 1}_date'),
+        'orders_pending_count' : orders_pending_count,
+        "pending_orders_list" : orders_pending_getter
     }
     
     return render(request, 'project-details.html', context)
@@ -511,6 +522,8 @@ def custom_admin_view(request):
         maintenance_mode = MaintenanceMode.objects.get(id=1).maintenace_mode
         if maintenance_mode == True:
             return redirect(maintenance_view)
+    orders_pending_getter = Projects.objects.filter(is_active = True, stage1 = True, stage2 = True, stage3 = True, stage4 = True, stage5 = True, stage6 = False, stage7 = False, stage8 = False, stage9 = False, is_ordered = False)
+    orders_pending_count = len(orders_pending_getter)
     maintenance_mode_getter = MaintenanceMode.objects.get(id=1).maintenace_mode
     sites_getter = Projects.objects.all()
     sites = []
@@ -606,4 +619,4 @@ def custom_admin_view(request):
             project_to_be_inactive.save()
             return redirect("custom_admin_view")
 
-    return render(request, "admin.html", {"maintenance_mode" : maintenance_mode_getter, "sites" : sites, "inventory_items" : items } )
+    return render(request, "admin.html", {"maintenance_mode" : maintenance_mode_getter, "sites" : sites, "inventory_items" : items, 'orders_pending_count' : orders_pending_count, "pending_orders_list" : orders_pending_getter } )
